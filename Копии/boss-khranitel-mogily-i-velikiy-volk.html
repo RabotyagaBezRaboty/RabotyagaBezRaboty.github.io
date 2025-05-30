@@ -1,0 +1,460 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Хранитель могилы и великий волк — Dark Souls III</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-image: url('images/Main/background.png');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            color: #fff;
+            line-height: 1.8;
+        }
+        a {
+            color: #f5a623;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .header {
+            background-color: rgba(42, 52, 53, 0.8);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #444;
+        }
+        .header__logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .header__nav {
+            margin-left: 1.25rem;
+        }
+        .header__nav-list {
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.3125rem;
+        }
+        .header__nav-item-link {
+            color: #fff;
+            font-size: 0.875rem;
+        }
+        .header__nav-item-link:hover {
+            color: #f5a623;
+        }
+        .page {
+            max-width: 1200px;
+            margin: 2rem auto;
+            display: flex;
+            gap: 2rem;
+            flex-direction: row-reverse;
+        }
+        .page__main {
+            background-color: rgba(42, 52, 53, 0.8);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            flex: 3;
+        }
+        .page__sidebar {
+            flex: 1;
+            background-color: rgba(42, 52, 53, 0.8);
+            padding: 1rem;
+            border-radius: 0.3125rem;
+        }
+        .page__main-title {
+            font-size: 2rem;
+            color: #f5a623;
+            margin-bottom: 1.25rem;
+            border-bottom: 2px solid #444;
+            padding-bottom: 0.625rem;
+        }
+        .page__main-section {
+            margin-bottom: 1.5rem;
+        }
+        .page__main-section-title {
+            font-size: 1.5rem;
+            color: #f5a623;
+            margin-top: 1.25rem;
+            margin-bottom: 0.625rem;
+        }
+        .page__main-section-text {
+            margin-bottom: 0.9375rem;
+            font-size: 1rem;
+        }
+        .page__main-section-list {
+            margin-left: 1.25rem;
+            margin-bottom: 0.9375rem;
+            font-size: 1rem;
+        }
+        .page__main-section-list-item {
+            margin-bottom: 0.3125rem;
+        }
+        .infobox {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: rgba(0, 0, 0, 0.3);
+            margin-bottom: 1rem;
+        }
+        .infobox th, .infobox td {
+            padding: 0.5rem;
+            border: 1px solid #444;
+            font-size: 0.875rem;
+        }
+        .infobox th {
+            background-color: rgba(245, 166, 35, 0.2);
+            color: #f5a623;
+            text-align: left;
+        }
+        .sidebar__image {
+            max-width: 100%;
+            border-radius: 5px;
+            display: block;
+            margin: 0 auto;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, auto);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .gallery__item {
+            position: relative;
+            cursor: pointer;
+        }
+        .gallery__image {
+            width: 180px;
+            height: 135px;
+            border-radius: 5px;
+            object-fit: cover;
+            display: block;
+            margin: 0 auto;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal__image {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 5px;
+        }
+        .modal__close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: #f5a623;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+        .footer {
+            background-color: rgba(42, 52, 53, 0.8);
+            padding: 0.625rem 1.25rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-top: 1.25rem;
+            border-top: 1px solid #444;
+        }
+        details {
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+        summary {
+            font-size: 0.875rem;
+            color: #fff;
+            padding: 0.5rem;
+        }
+        details[open] summary {
+            color: #f5a623;
+        }
+        details ul {
+            list-style: none;
+            padding: 0.5rem 1rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid #444;
+            border-top: none;
+        }
+        details li {
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        @media (max-width: 768px) {
+            .page {
+                flex-direction: column;
+            }
+            .page__main, .page__sidebar {
+                width: 100%;
+            }
+            .gallery {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+            }
+            .gallery__image {
+                width: 100%;
+                height: auto;
+                max-width: 180px;
+            }
+        }
+    </style>
+    <script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+            return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+            if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+                try {
+                    var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                    var firstSheetName = workbook.SheetNames[0];
+                    var worksheet = workbook.Sheets[firstSheetName];
+                    var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                    var filteredData = jsonData.filter(row => row.some(filledCell));
+                    var headerRowIndex = filteredData.findIndex((row, index) =>
+                        row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                    );
+                    if (headerRowIndex === -1 || headerRowIndex > 25) {
+                        headerRowIndex = 0;
+                    }
+                    var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+                    csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                    return csv;
+                } catch (e) {
+                    console.error(e);
+                    return "";
+                }
+            }
+            return gk_fileData[filename] || "";
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('.gallery__image');
+            const modal = document.querySelector('.modal');
+            const modalImage = document.querySelector('.modal__image');
+            const modalClose = document.querySelector('.modal__close');
+            images.forEach(image => {
+                image.addEventListener('click', () => {
+                    modalImage.src = image.src;
+                    modal.style.display = 'flex';
+                });
+            });
+            modalClose.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="header__logo">Dark Souls III</a>
+        <nav class="header__nav">
+            <ul class="header__nav-list">
+                <li class="header__nav-item"><a href="index.html#gameplay" class="header__nav-item-link">Игровой процесс</a></li>
+                <li class="header__nav-item"><a href="index.html#development" class="header__nav-item-link">Разработка</a></li>
+                <li class="header__nav-item"><a href="index.html#dlc" class="header__nav-item-link">Дополнения</a></li>
+                <li class="header__nav-item"><a href="index.html#story" class="header__nav-item-link">Сюжет</a></li>
+                <li class="header__nav-item"><a href="bosses.html" class="header__nav-item-link">Боссы</a></li>
+                <li class="header__nav-item"><a href="index.html#requirements" class="header__nav-item-link">Технические требования</a></li>
+                <li class="header__nav-item"><a href="index.html#gallery" class="header__nav-item-link">Галерея</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="page">
+        <div class="page__sidebar">
+            <table class="infobox">
+                <tr><th colspan="2">Хранитель могилы и великий волк</th></tr>
+                <tr><td colspan="2"><img src="images/Boss/Logo/20.webp" alt="Хранитель и волк" class="sidebar__image"></td></tr>
+                <tr><td>Местоположение</td><td>Нарисованный мир Арианделя</td></tr>
+                <tr>
+                    <td>Здоровье</td>
+                    <td>
+                        <details>
+                            <summary>Показать здоровье</summary>
+                            <ul>
+                                <li>Хранитель (NG): 2,791</li>
+                                <li>Хранитель (NG+): 2,794</li>
+                                <li>Хранитель (NG+2): 3,074</li>
+                                <li>Хранитель (NG+3): 3,213</li>
+                                <li>Хранитель (NG+4): 3,353</li>
+                                <li>Хранитель (NG+5): 3,632</li>
+                                <li>Хранитель (NG+6): 3,772</li>
+                                <li>Хранитель (NG+7): 3,912</li>
+                                <li>Великий волк (NG): 4,193</li>
+                                <li>Великий волк (NG+): 4,197</li>
+                                <li>Великий волк (NG+2): 4,617</li>
+                                <li>Великий волк (NG+3): 4,827</li>
+                                <li>Великий волк (NG+4): 5,037</li>
+                                <li>Великий волк (NG+5): 5,457</li>
+                                <li>Великий волк (NG+6): 5,666</li>
+                                <li>Великий волк (NG+7): 5,976</li>
+                            </ul>
+                        </details>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Души</td>
+                    <td>
+                        <details>
+                            <summary>Показать души</summary>
+                            <ul>
+                                <li>NG: 60,000</li>
+                                <li>NG+: 120,000</li>
+                                <li>NG+2: 132,000</li>
+                                <li>NG+3: 135,000</li>
+                                <li>NG+4: 144,000</li>
+                                <li>NG+5: 147,000</li>
+                                <li>NG+6: 150,000</li>
+                                <li>NG+7: 153,000</li>
+                            </ul>
+                        </details>
+                    </td>
+                </tr>
+                <tr><td>Дроп</td><td>Храброе сердце, Кости чемпиона</td></tr>
+                <tr><td>Слабости</td><td>Кровотечение, Яд, Огонь</td></tr>
+            </table>
+        </div>
+        <div class="page__main">
+            <h1 class="page__main-title">Хранитель могилы и великий волк</h1>
+            <section class="page__main-section">
+                <p class="page__main-section-text">Хранитель могилы чемпиона и великий волк — опциональный босс из дополнения <em>Dark Souls III: Ashes of Ariandel</em>, расположенный в Нарисованном мире Арианделя. Этот бой представляет собой динамичное сражение против двух противников: Хранителя могилы, искусного мечника, и Великого волка, могучего зверя, использующего стремительные атаки. Бой, хотя и не такой сложный, как с <a href="boss-otec-ariandel-i-sestra-friede.html">Фриде</a>, требует от игрока внимательности и умения управлять несколькими врагами одновременно, что делает его запоминающимся испытанием в заснеженных просторах Арианделя.</p>
+
+                <h2 class="page__main-section-title">Лор</h2>
+                <p class="page__main-section-text">Хранитель могилы чемпиона и Великий волк — стражи Нарисованного мира Арианделя, защищающие священные могилы, которые хранят память о прошлом этого хрупкого мира. Их роль схожа с <a href="boss-sudiya-gundir.html">Судьей Гундиром</a>, который также выступает стражем, проверяющим силу путников. Великий волк, вероятно, является духовным наследником легендарного волка Сива из оригинальной Dark Souls, символизируя связь между циклами разрушения и возрождения миров. Хранитель, в свою очередь, — одинокий воин, посвятивший себя защите могил, возможно, как часть ритуала, связанного с сохранением Арианделя. Их история переплетается с <a href="boss-dusha-pepla.html">Душой пепла</a>, подчеркивая тему долга и неизбежного упадка.</p>
+                <p class="page__main-section-text">Нарисованный мир Арианделя, как и его предшественник из первой части серии, является убежищем для отверженных, но его гниение ставит под угрозу его существование. Хранитель и волк, защищая могилы, символизируют сопротивление этому распаду, но их действия также подчеркивают тщетность борьбы против неизбежного. Их связь с <a href="boss-otec-ariandel-i-sestra-friede.html">Фриде и Арианделем</a> намекает на более глубокую историю, где каждый персонаж играет свою роль в поддержании или разрушении этого мира. Бой с Хранителем и волком — это не только проверка силы, но и отражение трагедии Арианделя, где даже самые преданные стражи не могут остановить угасание.</p>
+
+                <h2 class="page__main-section-title">Геймплей</h2>
+                <p class="page__main-section-text">Бой с Хранителем могилы и Великим волком делится на две фазы, каждая из которых требует разных подходов:</p>
+                <ul class="page__main-section-list">
+                    <li class="page__main-section-list-item"><strong>Фаза 1</strong>: Хранитель могилы сражается один, используя быстрые удары мечом и вызывая стаю мелких волков для поддержки. Его атаки стремительны, но предсказуемы, что позволяет игроку контратаковать после уклонений. Основная задача — быстро устранить Хранителя, чтобы минимизировать угрозу от волков. Игнорируйте мелких волков, если возможно, сосредоточившись на Хранителе, так как их атаки слабы, но могут отвлекать.</li>
+                    <li class="page__main-section-list-item"><strong>Фаза 2</strong>: После победы над Хранителем появляется Великий волк, который использует мощные рывки, укусы и ледяное дыхание. Его атаки покрывают большую часть арены, требуя от игрока постоянного движения. Держите дистанцию, чтобы избежать ледяного дыхания, и атакуйте после рывков волка, когда он на мгновение останавливается. Эта фаза более интенсивна, но предсказуемые атаки волка позволяют опытным игрокам эффективно контратаковать.</li>
+                </ul>
+                <p class="page__main-section-text">Хранитель и волк уязвимы к кровотечению, яду и огню, что делает оружие, такое как <em>Утигатана</em> с огненной смолой, или предметы, такие как ядовитые ножи, отличным выбором. Бой проще, чем с <a href="boss-pontifik-salivan.html">Понтификом Саливаном</a>, но сложнее, чем с <a href="boss-vordt-iz-kholodnoy-doliny.html">Вордтом из Холодной долины</a>, из-за необходимости справляться с несколькими врагами и быстрыми атаками. Арена боя, заснеженное поле с могилами, предоставляет достаточно пространства для маневров, но требует осторожности, чтобы не попасть в окружение волков.</p>
+
+                <h2 class="page__main-section-title">Стратегия боя</h2>
+                <p class="page__main-section-text">Для успешного прохождения боя с Хранителем могилы и Великим волком рекомендуется использовать следующие стратегии:</p>
+                <ul class="page__main-section-list">
+                    <li class="page__main-section-list-item">В первой фазе сосредоточьтесь на Хранителе, игнорируя мелких волков, если это возможно. Используйте быстрые атаки, чтобы прервать его комбинации, и уклоняйтесь от его рубящих ударов. Оружие с кровотечением, такое как <em>Кинжалы бандита</em>, быстро истощит его здоровье.</li>
+                    <li class="page__main-section-list-item">Используйте огненное оружие или заклинания, такие как <em>Огненная сфера</em>, чтобы наносить повышенный урон обоим противникам. Ядовитые ножи или заклинание <em>Ядовитый туман</em> эффективны против Великого волка, так как он уязвим к яду.</li>
+                    <li class="page__main-section-list-item">Во второй фазе держите дистанцию от Великого волка, чтобы избежать его ледяного дыхания и рывков. Атакуйте после его рывков, когда он останавливается, нанося 2-3 удара, а затем отступайте. Избегайте углов арены, чтобы не быть загнанным в ловушку.</li>
+                    <li class="page__main-section-list-item">Поддерживайте высокий уровень выносливости с помощью <em>Кольца с зеленым цветком</em>. Легкая броня, такая как <em>Комплект теней</em>, обеспечит мобильность, необходимую для уклонения от быстрых атак волка.</li>
+                    <li class="page__main-section-list-item">В кооперативе один игрок должен отвлекать мелких волков и Хранителя в первой фазе, пока другой наносит урон. Во второй фазе один игрок может удерживать внимание Великого волка, позволяя другому использовать дистанционные атаки или заклинания.</li>
+                    <li class="page__main-section-list-item">Если у вас есть запас ядовитых ножей, используйте их против Великого волка, чтобы нанести постепенный урон, пока вы уклоняетесь от его атак. Это особенно полезно для билдов с низкой выносливостью.</li>
+                </ul>
+                <p class="page__main-section-text">Для магов рекомендуется использовать огненные заклинания, такие как <em>Огненная буря</em> или <em>Пылающий хаос</em>, чтобы наносить урон на расстоянии. Персонажи ближнего боя должны полагаться на быстрые атаки и уклонения, чтобы минимизировать риск от рывков волка. Использование огненных смол или углей усилит урон против обоих противников, особенно если у вас нет оружия с врожденным огненным уроном.</p>
+
+                <h2 class="page__main-section-title">Дроп</h2>
+                <p class="page__main-section-text">После победы над Хранителем и Великим волком игрок получает <strong>Храброе сердце</strong> и <strong>Кости чемпиона</strong>, а также от 60,000 душ на первом прохождении (NG) до 153,000 душ на NG+7. Храброе сердце открывает доступ к уникальному предмету или ритуалу, связанному с лором Арианделя, а Кости чемпиона могут быть использованы для получения дополнительных наград.</p>
+
+                <h2 class="page__main-section-title">Заметки</h2>
+                <ul class="page__main-section-list">
+                    <li class="page__main-section-list-item">Великий волк напоминает <a href="boss-khraniteli-bezdny.html">Хранителей Бездны</a> своей агрессивной манерой боя и связью с древними стражами, что добавляет ностальгический оттенок для фанатов серии.</li>
+                    <li class="page__main-section-list-item">Огненное оружие, такое как <em>Огненный меч</em>, или огненные смолы значительно облегчают бой, особенно против Великого волка, который крайне уязвим к огню.</li>
+                    <li class="page__main-section-list-item">Связь Хранителя и волка с <a href="boss-lotrik-mladshiy-prints-i-lorian-starshiy-prints.html">братьями Лотриком и Лорианом</a> подчеркивает тему стражей, защищающих угасающий порядок, что делает их частью общей повествовательной арки.</li>
+                    <li class="page__main-section-list-item">Бой является опциональным, но его прохождение открывает доступ к дополнительным сюжетным деталям и предметам, связанным с Нарисованным миром Арианделя.</li>
+                    <li class="page__main-section-list-item">Атмосфера боя, с заснеженной ареной и могилами, создает мрачное и эпическое настроение, усиливая ощущение противостояния древним стражам.</li>
+                </ul>
+
+                <h2 class="page__main-section-title">Галерея</h2>
+                <div class="gallery">
+                    <div class="gallery__item">
+                        <img src="images/Boss/Gravetender/1.webp" alt="Хранитель могилы" class="gallery__image">
+                    </div>
+                    <div class="gallery__item">
+                        <img src="images/Boss/Gravetender/2.png" alt="Великий волк" class="gallery__image">
+                    </div>
+                    <div class="gallery__item">
+                        <img src="images/Boss/Gravetender/3.webp" alt="Ледяное дыхание" class="gallery__image">
+                    </div>
+                    <div class="gallery__item">
+                        <img src="images/Boss/Gravetender/4.jpg" alt="Атака Хранителя" class="gallery__image">
+                    </div>
+                    <div class="gallery__item">
+                        <img src="images/Boss/Gravetender/5.webp" alt="Рывки волка" class="gallery__image">
+                    </div>
+                    <div class="gallery__item">
+                        <img src="images/Boss/Gravetender/6.webp" alt="Арена боя" class="gallery__image">
+                    </div>
+                </div>
+                <div class="modal">
+                    <span class="modal__close">×</span>
+                    <img class="modal__image" src="" alt="Увеличенное изображение">
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© Зубарев Илья</p>
+    </footer>
+</body>
+</html>

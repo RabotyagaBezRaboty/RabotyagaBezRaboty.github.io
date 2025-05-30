@@ -1,0 +1,372 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Боссы — Dark Souls III</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-image: url('images/Main/background.png');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            color: #fff;
+            line-height: 1.8;
+        }
+        a {
+            color: #f5a623;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .header {
+            background-color: rgba(42, 52, 53, 0.8);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #444;
+        }
+        .header__logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .header__nav {
+            margin-left: 1.25rem;
+        }
+        .header__nav-list {
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.3125rem;
+        }
+        .header__nav-item-link {
+            color: #fff;
+            font-size: 0.875rem;
+        }
+        .header__nav-item-link:hover {
+            color: #f5a623;
+        }
+        .page {
+            max-width: 1200px;
+            margin: 2rem auto;
+            background-color: rgba(42, 52, 53, 0.8);
+            padding: 2rem;
+            border-radius: 0.5rem;
+        }
+        .page__main-title {
+            font-size: 2rem;
+            color: #f5a623;
+            margin-bottom: 1.25rem;
+            border-bottom: 2px solid #444;
+            padding-bottom: 0.625rem;
+        }
+        .page__main-section {
+            margin-bottom: 1.5rem;
+        }
+        .page__main-section-title {
+            font-size: 1.5rem;
+            color: #f5a623;
+            margin-top: 1.25rem;
+            margin-bottom: 0.625rem;
+        }
+        .page__main-section-text {
+            margin-bottom: 0.9375rem;
+            font-size: 1rem;
+        }
+        .page__main-section-list {
+            margin-left: 1.25rem;
+            margin-bottom: 0.9375rem;
+            font-size: 1rem;
+        }
+        .page__main-section-list-item {
+            margin-bottom: 0.3125rem;
+        }
+        .bosses {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .bosses__item {
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 0.3125rem;
+            overflow: hidden;
+            text-align: center;
+        }
+        .bosses__image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        .bosses__name {
+            padding: 0.625rem;
+            font-size: 0.875rem;
+            color: #fff;
+        }
+        .footer {
+            background-color: rgba(42, 52, 53, 0.8);
+            padding: 0.625rem 1.25rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-top: 1.25rem;
+            border-top: 1px solid #444;
+        }
+        @media (max-width: 768px) {
+            .bosses {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="header__logo">Dark Souls III</a>
+        <nav class="header__nav">
+            <ul class="header__nav-list">
+                <li class="header__nav-item"><a href="index.html#gameplay" class="header__nav-item-link">Игровой процесс</a></li>
+                <li class="header__nav-item"><a href="index.html#development" class="header__nav-item-link">Разработка</a></li>
+                <li class="header__nav-item"><a href="index.html#dlc" class="header__nav-item-link">Дополнения</a></li>
+                <li class="header__nav-item"><a href="index.html#story" class="header__nav-item-link">Сюжет</a></li>
+                <li class="header__nav-item"><a href="bosses.html" class="header__nav-item-link">Боссы</a></li>
+                <li class="header__nav-item"><a href="index.html#requirements" class="header__nav-item-link">Технические требования</a></li>
+                <li class="header__nav-item"><a href="index.html#gallery" class="header__nav-item-link">Галерея</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="page">
+        <h1 class="page__main-title">Боссы Dark Souls III</h1>
+        <section class="page__main-section">
+            <p class="page__main-section-text">Босс (англ. <em>Boss</em>) — не возрождающийся, могучий и опасный противник, обладающий большим количеством здоровья и разрушительными атаками. Боссы являются ключевой частью <em>Dark Souls III</em>, представляя собой серьёзные испытания для игрока.</p>
+
+            <h2 class="page__main-section-title">Описание</h2>
+            <p class="page__main-section-text">Боссы отличаются от рядовых противников и мини-боссов наличием полоски здоровья и имени, которые появляются, как только игрок вступает на арену. Каждый босс требует уникальной тактики боя, основанной на его особенностях и экипировке игрока. Обычно боссы скрываются за туманными вратами, давая время на подготовку, но при первом посещении туман может отсутствовать, так что сохраняйте бдительность.</p>
+            <p class="page__main-section-text">Каждый босс имеет уникальную арену, которая может как облегчить, так и усложнить бой. Некоторые боссы не нападают сразу, ожидая игрока в центре арены или появляясь после кат-сцены.</p>
+            <p class="page__main-section-text">Многие боссы имеют до трёх фаз, переключаемых по времени или при достижении определённого уровня здоровья. В новых фазах возможны следующие изменения:</p>
+            <ul class="page__main-section-list">
+                <li class="page__main-section-list-item">Появление нового оружия или усиления.</li>
+                <li class="page__main-section-list-item">Изменение паттерна атак, их скорости или амплитуды.</li>
+                <li class="page__main-section-list-item">Призыв рядовых врагов или союзников босса.</li>
+                <li class="page__main-section-list-item">Изменение арены боя.</li>
+                <li class="page__main-section-list-item">Полное восстановление здоровья босса (редко).</li>
+            </ul>
+            <p class="page__main-section-text">Победа над боссом приносит большое количество душ и, как правило, душу босса (кроме <a href="boss-sudiya-gundir.html">Судьи Гундира</a>, <a href="boss-khranitel-mogily-i-velikiy-volk.html">Хранителя могилы и великого волка</a>, <a href="boss-kopye-tserkvi.html">Копья церкви</a> и <a href="boss-drevnyaya-viverna.html">Древней виверны</a>). Душу можно использовать для создания уникальных предметов: оружия, заклинаний, щитов или колец. Убийство большинства боссов необходимо для продвижения по сюжету и получения квестовых предметов.</p>
+
+            <h2 class="page__main-section-title">Обязательные боссы</h2>
+            <div class="bosses">
+                <div class="bosses__item">
+                    <a href="boss-sudiya-gundir.html">
+                        <img src="images/Boss/Logo/1.webp" alt="Судья Гундир" class="bosses__image">
+                        <div class="bosses__name">Судья Гундир</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-vordt-iz-kholodnoy-doliny.html">
+                        <img src="images/Boss/Logo/2.webp" alt="Вордт из Холодной долины" class="bosses__image">
+                        <div class="bosses__name">Вордт из Холодной долины</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-znatok-kristalnykh-char.html">
+                        <img src="images/Boss/Logo/3.webp" alt="Знаток кристальных чар" class="bosses__image">
+                        <div class="bosses__name">Знаток кристальных чар</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-dyakony-glubin.html">
+                        <img src="images/Boss/Logo/4.webp" alt="Дьяконы Глубин" class="bosses__image">
+                        <div class="bosses__name">Дьяконы Глубин</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-khraniteli-bezdny.html">
+                        <img src="images/Boss/Logo/5.webp" alt="Хранители Бездны" class="bosses__image">
+                        <div class="bosses__name">Хранители Бездны</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-verkhovnyy-povelitel-volnir.html">
+                        <img src="images/Boss/Logo/6.webp" alt="Верховный повелитель Вольнир" class="bosses__image">
+                        <div class="bosses__name">Верховный повелитель Вольнир</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-pontifik-salivan.html">
+                        <img src="images/Boss/Logo/7.webp" alt="Понтифик Саливан" class="bosses__image">
+                        <div class="bosses__name">Понтифик Саливан</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-aldrich-pozhiratel-bogov.html">
+                        <img src="images/Boss/Logo/8.webp" alt="Олдрик, Пожиратель богов" class="bosses__image">
+                        <div class="bosses__name">Олдрик, Пожиратель богов</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-gigant-yorm.html">
+                        <img src="images/Boss/Logo/9.webp" alt="Гигант Йорм" class="bosses__image">
+                        <div class="bosses__name">Гигант Йорм</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-tantsovshchitsa-kholodnoy-doliny.html">
+                        <img src="images/Boss/Logo/10.webp" alt="Танцовщица Холодной долины" class="bosses__image">
+                        <div class="bosses__name">Танцовщица Холодной долины</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-dospekhi-drakonobortsa.html">
+                        <img src="images/Boss/Logo/11.webp" alt="Доспехи драконоборца" class="bosses__image">
+                        <div class="bosses__name">Доспехи драконоборца</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-lotrik-mladshiy-prints-i-lorian-starshiy-prints.html">
+                        <img src="images/Boss/Logo/12.webp" alt="Лотрик и Лориан" class="bosses__image">
+                        <div class="bosses__name">Лотрик и Лориан</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-dusha-pepla.html">
+                        <img src="images/Boss/Logo/13.webp" alt="Душа Пепла" class="bosses__image">
+                        <div class="bosses__name">Душа Пепла</div>
+                    </a>
+                </div>
+            </div>
+
+            <h2 class="page__main-section-title">Опциональные боссы</h2>
+            <div class="bosses">
+                <div class="bosses__item">
+                    <a href="boss-proklyatoe-velikoe-drevo.html">
+                        <img src="images/Boss/Logo/14.webp" alt="Проклятое Великое Древо" class="bosses__image">
+                        <div class="bosses__name">Проклятое Великое Древо</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-staryy-korol-demonov.html">
+                        <img src="images/Boss/Logo/15.webp" alt="Старый король демонов" class="bosses__image">
+                        <div class="bosses__name">Старый король демонов</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-oceiros-snedayemyy-korol.html">
+                        <img src="images/Boss/Logo/16.webp" alt="Оцейрос, Снедаемый король" class="bosses__image">
+                        <div class="bosses__name">Оцейрос, Снедаемый король</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-chempion-gundir.html">
+                        <img src="images/Boss/Logo/17.webp" alt="Чемпион Гундир" class="bosses__image">
+                        <div class="bosses__name">Чемпион Гундир</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-drevnyaya-viverna.html">
+                        <img src="images/Boss/Logo/18.webp" alt="Древняя виверна" class="bosses__image">
+                        <div class="bosses__name">Древняя виверна</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-bezymiannyy-korol.html">
+                        <img src="images/Boss/Logo/19.webp" alt="Безымянный Король" class="bosses__image">
+                        <div class="bosses__name">Безымянный Король</div>
+                    </a>
+                </div>
+            </div>
+
+            <h2 class="page__main-section-title">Боссы из дополнений</h2>
+            <div class="bosses">
+                <div class="bosses__item">
+                    <a href="boss-khranitel-mogily-i-velikiy-volk.html">
+                        <img src="images/Boss/Logo/20.webp" alt="Хранитель могилы и великий волк" class="bosses__image">
+                        <div class="bosses__name">Хранитель могилы и великий волк</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-otec-ariandel-i-sestra-friede.html">
+                        <img src="images/Boss/Logo/21.webp" alt="Отец Ариандель и сестра Фриде" class="bosses__image">
+                        <div class="bosses__name">Отец Ариандель и сестра Фриде</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-demon-prince.html">
+                        <img src="images/Boss/Logo/22.webp" alt="Демон-принц" class="bosses__image">
+                        <div class="bosses__name">Демон-принц</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-midir-pozhiratel-tmy.html">
+                        <img src="images/Boss/Logo/23.webp" alt="Мидир Пожиратель Тьмы" class="bosses__image">
+                        <div class="bosses__name">Мидир Пожиратель Тьмы</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-kopye-tserkvi.html">
+                        <img src="images/Boss/Logo/24.webp" alt="Копьё церкви" class="bosses__image">
+                        <div class="bosses__name">Копьё церкви</div>
+                    </a>
+                </div>
+                <div class="bosses__item">
+                    <a href="boss-rytsar-rab-gael.html">
+                        <img src="images/Boss/Logo/25.webp" alt="Рыцарь Гаэль" class="bosses__image">
+                        <div class="bosses__name">Рыцарь Гаэль</div>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <p>© Зубарев Илья</p>
+    </footer>
+</body>
+</html>

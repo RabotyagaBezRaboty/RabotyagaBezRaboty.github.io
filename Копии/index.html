@@ -1,0 +1,572 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Souls III</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-image: url('images/Main/background.png');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            color: #fff;
+            line-height: 1.6;
+        }
+
+        a {
+            color: #f5a623;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .header {
+            background-color: rgba(42, 52, 53, 0.8);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #444;
+        }
+
+        .header__logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .header__nav {
+            margin-left: 1.25rem;
+        }
+
+        .header__nav-list {
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .header__nav-item-link {
+            color: #fff;
+            font-size: 0.875rem;
+        }
+
+        .header__nav-item-link:hover {
+            color: #f5a623;
+        }
+
+        .page {
+            max-width: 1200px;
+            margin: 2rem auto;
+            display: flex;
+            gap: 1.25rem;
+        }
+
+        .page__main {
+            flex: 3;
+            background-color: rgba(42, 52, 53, 0.8);
+            padding: 1.5rem;
+            border-radius: 0.3125rem;
+        }
+
+        .page__main-title {
+            font-size: 2rem;
+            color: #f5a623;
+            margin-bottom: 1.25rem;
+            border-bottom: 2px solid #444;
+            padding-bottom: 0.625rem;
+        }
+
+        .page__main-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .page__main-section-title {
+            font-size: 1.5rem;
+            color: #f5a623;
+            margin-top: 1.25rem;
+            margin-bottom: 0.625rem;
+        }
+
+        .page__main-section-subtitle {
+            font-size: 1.25rem;
+            color: #f5a623;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page__main-section-text {
+            margin-bottom: 0.9375rem;
+            font-size: 1rem;
+        }
+
+        .page__main-section-list {
+            margin-left: 1.25rem;
+            font-size: 1rem;
+        }
+
+        .page__main-section-list-item {
+            margin-bottom: 0.3125rem;
+        }
+
+        .page__sidebar {
+            flex: 1;
+            background-color: rgba(42, 52, 53, 0.8);
+            padding: 1.25rem;
+            border-radius: 0.3125rem;
+        }
+
+        .page__sidebar-image {
+            width: 100%;
+            height: auto;
+            border-radius: 0.3125rem;
+            margin-bottom: 0.9375rem;
+        }
+
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem; /* Увеличено расстояние между изображениями */
+            margin-top: 1rem;
+            justify-content: center; /* Центрирование галереи */
+        }
+
+        .gallery__image {
+            width: 200px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 0.3125rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery__image:hover {
+            transform: scale(1.05);
+        }
+
+        .infobox {
+            width: 100%;
+            border-collapse: collapse;
+            color: #fff;
+            font-size: 0.875rem;
+        }
+
+        .infobox__row {
+            border-bottom: 1px solid #444;
+        }
+
+        .infobox__header,
+        .infobox__data {
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .infobox__header {
+            background-color: rgba(58, 68, 69, 0.8);
+            color: #f5a623;
+            font-weight: bold;
+        }
+
+        .bosses-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .bosses-list__item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .bosses-list__item--center {
+            grid-column: 2;
+        }
+
+        .bosses-list__image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 0.3125rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .bosses-list__name {
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        .footer {
+            background-color: rgba(42, 52, 53, 0.8);
+            padding: 0.625rem 1.25rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-top: 1.25rem;
+            border-top: 1px solid #444;
+        }
+
+        /* Стили для модального окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal__content {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 90%;
+            max-width: 1000px;
+        }
+
+        .modal__image {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 0.3125rem;
+            object-fit: contain;
+        }
+
+        .modal__nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            background: url('images/Main/стрелка.png') no-repeat center;
+            background-size: contain;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal__nav:hover {
+            opacity: 1;
+        }
+
+        .modal__nav--prev {
+            left: -60px;
+            transform: translateY(-50%) scaleX(-1);
+        }
+
+        .modal__nav--next {
+            right: -60px;
+        }
+
+        @media (max-width: 768px) {
+            .page {
+                flex-direction: column;
+            }
+
+            .bosses-list {
+                grid-template-columns: 1fr;
+            }
+
+            .bosses-list__item--center {
+                grid-column: auto;
+            }
+
+            .modal__nav--prev {
+                left: 10px;
+            }
+
+            .modal__nav--next {
+                right: 10px;
+            }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+            return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+            if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+                try {
+                    var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                    var firstSheetName = workbook.SheetNames[0];
+                    var worksheet = workbook.Sheets[firstSheetName];
+
+                    // Convert sheet to JSON to filter blank rows
+                    var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                    // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                    var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                    // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                    var headerRowIndex = filteredData.findIndex((row, index) =>
+                        row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                    );
+                    // Fallback
+                    if (headerRowIndex === -1 || headerRowIndex > 25) {
+                        headerRowIndex = 0;
+                    }
+
+                    // Convert filtered JSON back to CSV
+                    var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+                    csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                    return csv;
+                } catch (e) {
+                    console.error(e);
+                    return "";
+                }
+            }
+            return gk_fileData[filename] || "";
+        }
+    </script>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="header__logo">Dark Souls III</a>
+        <nav class="header__nav">
+            <ul class="header__nav-list">
+                <li class="header__nav-item"><a href="#gameplay" class="header__nav-item-link">Игровой процесс</a></li>
+                <li class="header__nav-item"><a href="#development" class="header__nav-item-link">Разработка</a></li>
+                <li class="header__nav-item"><a href="#dlc" class="header__nav-item-link">Дополнения</a></li>
+                <li class="header__nav-item"><a href="#story" class="header__nav-item-link">Сюжет</a></li>
+                <li class="header__nav-item"><a href="bosses.html" class="header__nav-item-link">Боссы</a></li>
+                <li class="header__nav-item"><a href="#requirements" class="header__nav-item-link">Технические требования</a></li>
+                <li class="header__nav-item"><a href="#gallery" class="header__nav-item-link">Галерея</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="page">
+        <div class="page__main">
+            <h1 class="page__main-title">Dark Souls III</h1>
+
+            <section id="gameplay" class="page__main-section">
+                <h2 class="page__main-section-title">1. Игровой процесс</h2>
+                <p class="page__main-section-text">Dark Souls III сочетает элементы экшен-RPG с высокой сложностью. Игроки берут на себя роль игрока, который исследует мрачный фэнтезийный мир, сражается с врагами и <a href="bosses.html">Боссами</a>, и пытается понять свою роль в судьбе мира.</p>
+                <p class="page__main-section-text">Основные аспекты геймплея включают:</p>
+                <ul class="page__main-section-list">
+                    <li class="page__main-section-list-item">Исследование мира: игроки путешествуют по взаимосвязанным локациям, полным секретов, ловушек и врагов.</li>
+                    <li class="page__main-section-list-item">Сражения: бой требует тактики, правильного выбора оружия и управления запасами выносливости. Каждый враг, особенно <a href="bosses.html">Боссы</a>, представляет уникальную угрозу, заставляя игрока адаптироваться.</li>
+                    <li class="page__main-section-list-item">Ролевые элементы: выбор класса, прокачка характеристик, настройка экипировки. Игроки могут выбирать между ближним боем, магией или гибридным стилем.</li>
+                    <li class="page__main-section-list-item">Мультиплеер: кооперативный режим, вторжения других игроков (PvP), система ковенантов. Игроки могут оставлять сообщения и видеть "призраков" других игроков.</li>
+                    <li class="page__main-section-list-item">Система костров: точки сохранения, где можно восстанавливать здоровье, улучшать персонажа и перемещаться между локациями.</li>
+                </ul>
+            </section>
+
+            <section id="development" class="page__main-section">
+                <h2 class="page__main-section-title">2. Разработка</h2>
+                <p class="page__main-section-text">Dark Souls III была разработана японской компанией FromSoftware под руководством Хидетаки Миядзаки, который также выступил режиссёром первых двух игр серии. Проект был анонсирован 15 июня 2015 года на выставке E3 2015.</p>
+                <p class="page__main-section-text">Разработка началась вскоре после завершения работы над Bloodborne, и команда стремилась объединить лучшие элементы предыдущих игр серии, добавив новые механики, такие как "боевые искусства" для оружия (Weapon Arts), которые позволяют выполнять специальные атаки.</p>
+
+                <h3 class="page__main-section-subtitle">2.1 Локализация</h3>
+                <p class="page__main-section-text">Локализацией игры для западного рынка занималась компания Bandai Namco Entertainment. Перевод был выполнен на несколько языков, включая русский, хотя фанаты отмечали, что некоторые термины и названия были переведены не совсем точно, что иногда затрудняло понимание лора.</p>
+                <p class="page__main-section-text">Русскоязычная версия игры получила субтитры, но озвучка осталась на английском языке. Сообщество игроков активно обсуждало качество перевода, и позже фанаты выпустили неофициальные патчи, улучшающие локализацию.</p>
+
+                <h3 class="page__main-section-subtitle">2.2 Музыка</h3>
+                <p class="page__main-section-text">Музыкальное сопровождение для Dark Souls III написал композитор Юка Китамура, ранее работавший над Dark Souls II и Bloodborne. Саундтрек включает мрачные оркестровые композиции, которые усиливают атмосферу игры, особенно во время битв с <a href="bosses.html">Боссами</a>.</p>
+                <p class="page__main-section-text">Каждая музыкальная тема была создана с учётом характера босса: например, тема "Abyss Watchers" подчёркивает трагичность их судьбы, а музыка для финального босса, Soul of Cinder, отсылает к мелодиям из первой Dark Souls.</p>
+            </section>
+
+            <section id="dlc" class="page__main-section">
+                <h2 class="page__main-section-title">3. Дополнения</h2>
+                <p class="page__main-section-text">Для Dark Souls III было выпущено два крупных дополнения, которые расширяют мир игры и добавляют новые локации, <a href="bosses.html">Боссов</a> и предметы.</p>
+                <ul class="page__main-section-list">
+                    <li class="page__main-section-list-item"><strong>Ashes of Ariandel</strong> (выпущено 24 октября 2016 года): игрок отправляется в заснеженный мир Арианделя, чтобы раскрыть его мрачные тайны. Дополнение включает новых <a href="bosses.html">Боссов</a>, таких как Сестра Фриде, и добавляет PvP-арену для мультиплеера.</li>
+                    <li class="page__main-section-list-item"><strong>The Ringed City</strong> (выпущено 28 марта 2017 года): финальное дополнение, где игрок исследует Кольцевой город, древнюю локацию, связанную с происхождением Пламени. Среди новых <a href="bosses.html">Боссов</a> — Демон-принц и Гаэль, последний из которых считается одним из сложнейших в серии.</li>
+                </ul>
+                <p class="page__main-section-text">Оба дополнения получили высокие оценки критиков за атмосферу и сложность, хотя некоторые игроки отмечали, что они слишком короткие по сравнению с ожиданиями.</p>
+            </section>
+
+            <section id="story" class="page__main-section">
+                <h2 class="page__main-section-title">4. Сюжет</h2>
+                <p class="page__main-section-text">Действие Dark Souls III происходит в королевстве Лотрик, где некогда могущественные Повелители Пепла, связавшие Первое Пламя, покинули свои троны. Пророчество гласит, что когда Пламя начнёт угасать, Повелители вернутся, чтобы вновь его разжечь. Однако они не возвращаются, и вместо них пробуждаются Негорящие — те, кто не смог стать пеплом.</p>
+                <p class="page__main-section-text">Главный герой, один из таких Негорящих, должен отправиться в путешествие, чтобы найти Повелителей Пепла и решить судьбу Пламени. В ходе игры он сталкивается с такими персонажами, как Хранительница огня, которая помогает герою на протяжении всего пути, и Людлех из Курланда, единственный Повелитель Пепла, оставшийся на своём троне.</p>
+                <p class="page__main-section-text">Сюжет игры подаётся через описания предметов, диалоги с NPC и окружающую среду, оставляя многое на интерпретацию игрока. Финал игры предлагает несколько концовок, зависящих от действий игрока: разжечь Пламя, погасить его или узурпировать его силу.</p>
+            </section>
+
+            <section id="bosses" class="page__main-section">
+                <h2 class="page__main-section-title">5. <a href="bosses.html">Боссы</a></h2>
+                <p class="page__main-section-text">Босс (англ. Boss) — не возрождающийся, могучий и опасный противник, обладающий большим количеством здоровья и разрушительными атаками.</p>
+                <p class="page__main-section-text"><a href="bosses.html">Боссы</a> отличаются от рядовых противников и мини-боссов наличием полоски здоровья и имени, появляющихся, как только игрок войдёт на арену для битвы, также почти каждый из них требует составления особой тактики боя с ним, основанной на особенностях самого босса и вооружения игрока. Как правило, <a href="bosses.html">Боссы</a> скрываются за туманными вратами, поэтому время для подготовки у вас будет. Но не стоит забывать, что туман, обычно, появляется только после первого прохода к боссу, поэтому не стоит терять бдительности, чтобы случайно не забрести к нему.</p>
+            </section>
+
+            <section id="requirements" class="page__main-section">
+                <h2 class="page__main-section-title">6. Технические требования</h2>
+                <p class="page__main-section-text">Для комфортной игры в Dark Souls III на ПК требуются следующие системные требования:</p>
+                <h3 class="page__main-section-subtitle">Минимальные требования:</h3>
+                <ul class="page__main-section-list">
+                    <li class="page__main-section-list-item">ОС: Windows 7 SP1, Windows 8.1, Windows 10 (64-bit)</li>
+                    <li class="page__main-section-list-item">Процессор: AMD A8 3870 / Intel Core i3 2100</li>
+                    <li class="page__main-section-list-item">Оперативная память: 8 ГБ</li>
+                    <li class="page__main-section-list-item">Видеокарта: NVIDIA GeForce GTX 465 / ATI Radeon TM HD 6870</li>
+                    <li class="page__main-section-list-item">Место на диске: 25 ГБ</li>
+                </ul>
+                <h3 class="page__main-section-subtitle">Рекомендуемые требования:</h3>
+                <ul class="page__main-section-list">
+                    <li class="page__main-section-list-item">ОС: Windows 10 (64-bit)</li>
+                    <li class="page__main-section-list-item">Процессор: AMD FX 8150 / Intel Core i7 2600</li>
+                    <li class="page__main-section-list-item">Оперативная память: 8 ГБ</li>
+                    <li class="page__main-section-list-item">Видеокарта: NVIDIA GeForce GTX 970</li>
+                    <li class="page__main-section-list-item">Место на диске: 25 ГБ</li>
+                </ul>
+            </section>
+
+            <section id="gallery" class="page__main-section">
+                <h2 class="page__main-section-title">7. Галерея</h2>
+                <div class="gallery">
+                    <img class="gallery__image" data-index="0" src="images/Main/gallery 1.png" alt="Локация: Храм Огня">
+                    <img class="gallery__image" data-index="1" src="images/Main/gallery 2.webp" alt="Локация: Лотрик">
+                    <img class="gallery__image" data-index="2" src="images/Main/gallery 3.webp" alt="Босс: Танцовщица Холодной долины">
+                    <img class="gallery__image" data-index="3" src="images/Main/gallery 4.webp" alt="Локация: Иритилл">
+                    <img class="gallery__image" data-index="4" src="images/Main/gallery 5.jpg" alt="Босс: Сестра Фриде">
+                    <img class="gallery__image" data-index="5" src="images/Main/gallery 6.jpg" alt="Локация: Кольцевой город">
+                    <img class="gallery__image" data-index="6" src="images/Main/gallery 7.jpg" alt="Босс: Душа Пепла">
+                    <img class="gallery__image" data-index="7" src="images/Main/gallery 8.jpg" alt="Локация: Архивы">
+                    <img class="gallery__image" data-index="8" src="images/Main/gallery 9.jpg" alt="Босс: Гаэль">
+                </div>
+            </section>
+        </div>
+
+        <div class="page__sidebar">
+            <img class="page__sidebar-image" src="images/Main/cover.webp" alt="Обложка Dark Souls III">
+            <table class="infobox">
+                <tr class="infobox__row">
+                    <th class="infobox__header">Название</th>
+                    <td class="infobox__data">Dark Souls III</td>
+                </tr>
+                <tr class="infobox__row">
+                    <th class="infobox__header">Разработчик</th>
+                    <td class="infobox__data">FromSoftware</td>
+                </tr>
+                <tr class="infobox__row">
+                    <th class="infobox__header">Издатель</th>
+                    <td class="infobox__data">Bandai Namco Entertainment</td>
+                </tr>
+                <tr class="infobox__row">
+                    <th class="infobox__header">Дата выхода</th>
+                    <td class="infobox__data">24 марта 2016 (Япония)<br>12 апреля 2016 (Северная Америка, Европа)</td>
+                </tr>
+                <tr class="infobox__row">
+                    <th class="infobox__header">Жанр</th>
+                    <td class="infobox__data">Action/RPG</td>
+                </tr>
+                <tr class="infobox__row">
+                    <th class="infobox__header">Платформы</th>
+                    <td class="infobox__data">Windows, PlayStation 4, Xbox One</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal" id="galleryModal">
+        <div class="modal__content">
+            <div class="modal__nav modal__nav--prev" onclick="changeImage(-1)"></div>
+            <img class="modal__image" id="modalImage" src="" alt="Увеличенное изображение">
+            <div class="modal__nav modal__nav--next" onclick="changeImage(1)"></div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© Зубарев Илья Алексеевич 2-ТИД-10</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const galleryImages = document.querySelectorAll('.gallery__image');
+            const modal = document.getElementById('galleryModal');
+            const modalImage = document.getElementById('modalImage');
+            let currentIndex = 0;
+
+            function openModal(index) {
+                currentIndex = parseInt(index);
+                modalImage.src = galleryImages[currentIndex].src;
+                modalImage.alt = galleryImages[currentIndex].alt;
+                modal.style.display = 'flex';
+            }
+
+            function closeModal() {
+                modal.style.display = 'none';
+            }
+
+            window.changeImage = function(direction) {
+                currentIndex = (currentIndex + direction + galleryImages.length) % galleryImages.length;
+                modalImage.src = galleryImages[currentIndex].src;
+                modalImage.alt = galleryImages[currentIndex].alt;
+            }
+
+            galleryImages.forEach(image => {
+                image.addEventListener('click', () => {
+                    openModal(image.dataset.index);
+                });
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+
+            // Поддержка навигации клавишами
+            document.addEventListener('keydown', (e) => {
+                if (modal.style.display === 'flex') {
+                    if (e.key === 'ArrowLeft') changeImage(-1);
+                    if (e.key === 'ArrowRight') changeImage(1);
+                    if (e.key === 'Escape') closeModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

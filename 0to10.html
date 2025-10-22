@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>0 to 10</title>
+<style>
+:root {
+    --bg-color: #f0f2f5;
+    --text-color: #333;
+    --border-color: #333;
+    --input-bg-color: #ffffff;
+    --input-border-color: #aaa;
+    --icon-fill-color: #333;
+}
+body.dark-mode {
+    --bg-color: #1e1e1e;
+    --text-color: #e0e0e0;
+    --border-color: #e0e0e0;
+    --input-bg-color: #2a2a2a;
+    --input-border-color: #555;
+    --icon-fill-color: #e0e0e0;
+}
+body {
+    background-color: var(--bg-color);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 50px 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+    transition: background-color 0.3s ease;
+}
+#theme-toggle-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.3s ease;
+    z-index: 2000;
+}
+#theme-toggle-btn svg {
+    width: 100%;
+    height: 100%;
+    fill: var(--icon-fill-color);
+    transition: fill 0.3s ease;
+}
+.main-content-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    width: 95%;
+    max-width: 1800px;
+}
+.controls-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    flex-shrink: 0;
+}
+.controls-sidebar button {
+    width: 120px;
+    padding: 12px 0;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+    color: white;
+}
+.scale-container {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    min-width: 0;
+}
+.scale-label {
+    color: var(--text-color);
+    font-size: 1.5em;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+.scale-bar {
+    flex-grow: 1;
+    height: 20px;
+    margin: 0 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    background: linear-gradient(to right, #e74c3c, #f1c40f, #2ecc71);
+    position: relative;
+    transition: border-color 0.3s ease;
+    overflow: visible;
+}
+.division-container {
+    position: absolute;
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: translateX(-50%);
+    cursor: grab;
+    transition: left 0.3s ease, opacity 0.2s ease;
+}
+.division-container.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+    transition: none;
+    z-index: 1000;
+}
+.division-stem {
+    width: 3px;
+    background-color: var(--border-color);
+    transition: background-color 0.3s ease, height 0.3s ease;
+}
+.division-container input {
+    width: 100%;
+    padding: 5px;
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--input-border-color);
+    border-radius: 5px;
+    text-align: center;
+    box-sizing: border-box;
+    font-size: 14px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.position-up { bottom: 10px; flex-direction: column-reverse; }
+.position-down { top: 10px; flex-direction: column; }
+#addButton { background-color: #2ecc71; }
+#addButton:hover { background-color: #27ae60; }
+#removeButton { background-color: #e74c3c; }
+#removeButton:hover { background-color: #c0392b; }
+.controls-sidebar button:active { transform: scale(0.98); }
+</style>
+</head>
+<body>
+
+<button id="theme-toggle-btn" title="Переключить тему">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM12 20V4C16.4183 4 20 7.58172 20 12C20 16.4183 16.4183 20 12 20Z"/>
+    </svg>
+</button>
+
+<main class="main-content-wrapper">
+    <div class="controls-sidebar">
+        <button id="addButton">Добавить</button>
+        <button id="removeButton">Удалить</button>
+    </div>
+    <div class="scale-container">
+        <span class="scale-label">0</span>
+        <div class="scale-bar" id="scaleBar"></div>
+        <span class="scale-label">10</span>
+    </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const scaleBar = document.getElementById('scaleBar');
+    const addButton = document.getElementById('addButton');
+    const removeButton = document.getElementById('removeButton');
+    const themeToggleButton = document.getElementById('theme-toggle-btn');
+
+    let divisionsData = JSON.parse(localStorage.getItem('divisionsData')) || ["Плохо", "Не очень", "Mid", "Хорошо", "Отлично"];
+    let draggedElement = null;
+    let draggedIndex = null;
+
+    const saveDivisions = () => localStorage.setItem('divisionsData', JSON.stringify(divisionsData));
+    const applyTheme = (theme) => document.body.classList.toggle('dark-mode', theme === 'dark');
+
+    themeToggleButton.addEventListener('click', () => {
+        const newTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+        applyTheme(newTheme);
+        localStorage.setItem('theme', newTheme);
+    });
+    applyTheme(localStorage.getItem('theme') || 'light');
+
+    function getDivisionStyles(index, layoutParams) {
+        const { isOverlapping, maxLevels } = layoutParams;
+        const isUp = (index + 1) % 2 !== 0;
+        const positionClass = isUp ? 'position-up' : 'position-down';
+        let level = 0;
+        if (isOverlapping) {
+            const typeIndex = Math.floor(index / 2);
+            level = typeIndex % maxLevels;
+        }
+        const baseStemHeight = 40;
+        const rowHeight = 50;
+        const stemHeight = baseStemHeight + (level * rowHeight);
+        return { positionClass, stemHeight };
+    }
+
+    function renderDivisions() {
+        scaleBar.innerHTML = '';
+        if (divisionsData.length === 0) return;
+        const segments = divisionsData.length + 1;
+        const scaleWidth = scaleBar.offsetWidth;
+        const segmentWidth = scaleWidth / segments;
+        const divisionNominalWidth = 120;
+        const isOverlapping = segmentWidth < divisionNominalWidth && divisionsData.length > 1;
+        const maxLevels = isOverlapping ? Math.ceil(divisionNominalWidth / segmentWidth) : 1;
+        const layoutParams = { isOverlapping, maxLevels };
+
+        divisionsData.forEach((text, index) => {
+            const container = document.createElement('div');
+            container.className = 'division-container';
+            container.draggable = true;
+            container.dataset.index = index;
+
+            const { positionClass, stemHeight } = getDivisionStyles(index, layoutParams);
+            container.classList.add(positionClass);
+
+            const stem = document.createElement('div');
+            stem.className = 'division-stem';
+            stem.style.height = `${stemHeight}px`;
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = text;
+            input.addEventListener('input', (e) => {
+                divisionsData[index] = e.target.value;
+                saveDivisions();
+            });
+
+            container.appendChild(stem);
+            container.appendChild(input);
+
+            const position = ((index + 1) / segments) * 100;
+            container.style.left = `${position}%`;
+            scaleBar.appendChild(container);
+        });
+        addDragAndDropHandlers();
+    }
+
+    function addDragAndDropHandlers() {
+        document.querySelectorAll('.division-container').forEach(div => {
+            div.addEventListener('dragstart', (e) => {
+                draggedElement = e.currentTarget;
+                draggedIndex = parseInt(draggedElement.dataset.index);
+                setTimeout(() => draggedElement.classList.add('dragging'), 0);
+            });
+            div.addEventListener('dragend', () => {
+                if (draggedElement) draggedElement.classList.remove('dragging');
+                draggedElement = null;
+                draggedIndex = null;
+                saveDivisions();
+                renderDivisions();
+            });
+        });
+    }
+
+    scaleBar.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        if (!draggedElement) return;
+        const scaleRect = scaleBar.getBoundingClientRect();
+        const mouseX = e.clientX - scaleRect.left;
+        const segmentWidth = scaleRect.width / (divisionsData.length + 1);
+        let targetIndex = Math.floor(mouseX / segmentWidth);
+        targetIndex = Math.max(0, Math.min(divisionsData.length - 1, targetIndex));
+        const previewData = [...divisionsData];
+        const item = previewData.splice(draggedIndex, 1)[0];
+        previewData.splice(targetIndex, 0, item);
+        document.querySelectorAll('.division-container').forEach((div, i) => {
+            const pos = ((previewData.indexOf(div.querySelector('input').value) + 1) / (previewData.length + 1)) * 100;
+            div.style.left = `${pos}%`;
+        });
+    });
+
+    scaleBar.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (draggedIndex === null) return;
+        const scaleRect = scaleBar.getBoundingClientRect();
+        const mouseX = e.clientX - scaleRect.left;
+        const segmentWidth = scaleRect.width / (divisionsData.length + 1);
+        let targetIndex = Math.floor(mouseX / segmentWidth);
+        targetIndex = Math.max(0, Math.min(divisionsData.length - 1, targetIndex));
+        const item = divisionsData.splice(draggedIndex, 1)[0];
+        divisionsData.splice(targetIndex, 0, item);
+        saveDivisions();
+        renderDivisions();
+    });
+
+    addButton.addEventListener('click', () => {
+        divisionsData.push("Новый");
+        saveDivisions();
+        renderDivisions();
+    });
+    removeButton.addEventListener('click', () => {
+        if (divisionsData.length > 0) {
+            divisionsData.pop();
+            saveDivisions();
+            renderDivisions();
+        }
+    });
+
+    renderDivisions();
+    window.addEventListener('resize', renderDivisions);
+});
+</script>
+</body>
+</html>

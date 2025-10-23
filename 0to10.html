@@ -1,319 +1,793 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>0 to 10</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <title>0 to 10</title>
 <style>
-:root {
-    --bg-color: #f0f2f5;
-    --text-color: #333;
-    --border-color: #333;
-    --input-bg-color: #ffffff;
-    --input-border-color: #aaa;
-    --icon-fill-color: #333;
-}
-body.dark-mode {
-    --bg-color: #1e1e1e;
-    --text-color: #e0e0e0;
-    --border-color: #e0e0e0;
-    --input-bg-color: #2a2a2a;
-    --input-border-color: #555;
-    --icon-fill-color: #e0e0e0;
-}
-body {
-    background-color: var(--bg-color);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    margin: 0;
-    padding: 50px 20px;
-    box-sizing: border-box;
-    overflow: hidden;
-    transition: background-color 0.3s ease;
-}
-#theme-toggle-btn {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    width: 40px;
-    height: 40px;
-    background: none;
-    border: 2px solid var(--border-color);
-    border-radius: 50%;
-    cursor: pointer;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: border-color 0.3s ease;
-    z-index: 2000;
-}
-#theme-toggle-btn svg {
-    width: 100%;
-    height: 100%;
-    fill: var(--icon-fill-color);
-    transition: fill 0.3s ease;
-}
-.main-content-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 30px;
-    width: 95%;
-    max-width: 1800px;
-}
-.controls-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    flex-shrink: 0;
-}
-.controls-sidebar button {
-    width: 120px;
-    padding: 12px 0;
-    font-size: 16px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.1s;
-    color: white;
-}
-.scale-container {
-    display: flex;
-    align-items: center;
-    flex-grow: 1;
-    min-width: 0;
-}
-.scale-label {
-    color: var(--text-color);
-    font-size: 1.5em;
-    font-weight: bold;
-    transition: color 0.3s ease;
-}
-.scale-bar {
-    flex-grow: 1;
-    height: 20px;
-    margin: 0 15px;
-    border: 2px solid var(--border-color);
-    border-radius: 10px;
-    background: linear-gradient(to right, #e74c3c, #f1c40f, #2ecc71);
-    position: relative;
-    transition: border-color 0.3s ease;
-    overflow: visible;
-}
-.division-container {
-    position: absolute;
-    width: 120px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transform: translateX(-50%);
-    cursor: grab;
-    transition: left 0.3s ease, opacity 0.2s ease;
-}
-.division-container.dragging {
-    opacity: 0.5;
-    cursor: grabbing;
-    transition: none;
-    z-index: 1000;
-}
-.division-stem {
-    width: 3px;
-    background-color: var(--border-color);
-    transition: background-color 0.3s ease, height 0.3s ease;
-}
-.division-container input {
-    width: 100%;
-    padding: 5px;
-    background-color: var(--input-bg-color);
-    color: var(--text-color);
-    border: 1px solid var(--input-border-color);
-    border-radius: 5px;
-    text-align: center;
-    box-sizing: border-box;
-    font-size: 14px;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-.position-up { bottom: 10px; flex-direction: column-reverse; }
-.position-down { top: 10px; flex-direction: column; }
-#addButton { background-color: #2ecc71; }
-#addButton:hover { background-color: #27ae60; }
-#removeButton { background-color: #e74c3c; }
-#removeButton:hover { background-color: #c0392b; }
-.controls-sidebar button:active { transform: scale(0.98); }
-</style>
+        :root {
+            --bg-color: #f0f2f5;
+            --text-color: #333;
+            --border-color: #333;
+            --input-bg-color: #ffffff;
+            --input-border-color: #aaa;
+            --icon-fill-color: #333;
+            --modal-bg: rgba(0, 0, 0, 0.4);
+            --modal-content-bg: #fff;
+            --sidebar-dark-bg: #212529;
+            --sidebar-text: #f8f9fa;
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --border-color: #e0e0e0;
+            --input-bg-color: #2a2a2a;
+            --input-border-color: #555;
+            --icon-fill-color: #e0e0e0;
+            --modal-bg: rgba(0, 0, 0, 0.7);
+            --modal-content-bg: #2a2a2a;
+            --sidebar-dark-bg: #212529;
+            --sidebar-text: #f8f9fa;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: row;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden; 
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* --- БОКОВАЯ ПАНЕЛЬ (ИСПРАВЛЕНО) --- */
+        .sidebar {
+            width: 70px; 
+            flex-shrink: 0;
+            background-color: var(--sidebar-dark-bg);
+            color: var(--sidebar-text);
+            padding: 20px 10px; /* ИЗМЕНЕНО: Уменьшили боковые отступы до 10px */
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            overflow: hidden; 
+        }
+
+        .sidebar-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .sidebar-spacer {
+            flex-grow: 1;
+        }
+        
+        .sidebar-group:last-child {
+             margin-bottom: 0;
+        }
+
+        .sidebar-header {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #adb5bd;
+            text-transform: uppercase;
+            border-bottom: 1px solid #495057;
+            padding-bottom: 5px;
+            white-space: nowrap;
+            opacity: 0; /* Скрыт */
+        }
+
+        .sidebar button, .sidebar-btn, .sidebar-label-with-icon {
+            padding: 10px 12px;
+            font-size: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s, justify-content 0.3s ease;
+            color: white;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 0; /* ИЗМЕНЕНО: Убран отступ */
+            background-color: #495057;
+            white-space: nowrap;
+            overflow: hidden;
+            justify-content: center; /* Центрируем иконку */
+        }
+        
+        .sidebar-btn svg, .sidebar-label-with-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--sidebar-text);
+            flex-shrink: 0; 
+        }
+
+        .sidebar button span, .sidebar-btn span, .sidebar-label-with-icon span {
+            display: none; /* ИЗМЕНЕНО: Полностью скрываем текст (вместо opacity: 0) */
+        }
+
+        .sidebar button:hover, .sidebar-btn:hover, .sidebar-label-with-icon:hover {
+            background-color: #5a6268;
+        }
+        
+        .sidebar button:active, .sidebar-btn:active, .sidebar-label-with-icon:active {
+            transform: scale(0.98);
+        }
+
+        #addButton { background-color: #2ecc71; }
+        #addButton:hover { background-color: #27ae60; }
+
+        label[for="zoom-slider"] {
+            font-size: 0.9em;
+            color: #adb5bd;
+            white-space: nowrap;
+        }
+        
+        /* --- ИЗМЕНЕНО: Стили ползунка (полностью) --- */
+        #zoom-slider {
+            width: 20px; /* Ширина (толщина) ползунка */
+            height: 120px; /* Высота ползунка */
+            cursor: pointer;
+            opacity: 1;
+            transition: opacity 0.2s ease;
+            
+            /* --- Новый метод: appearance --- */
+            -webkit-appearance: slider-vertical; /* Для Chrome/Safari/Edge */
+            appearance: slider-vertical; /* Стандарт */
+            
+            display: block; 
+            margin: 15px auto 0 auto; /* Центрирование */
+        }
+
+
+        /* --- ОСНОВНАЯ ЗОНА КОНТЕНТА (Без изменений) --- */
+        .content-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            height: 100vh; 
+            padding: 20px 40px; 
+            overflow: hidden;
+        }
+        
+        .scroll-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            padding-bottom: 20px;
+        }
+        
+        .scale-panning-container {
+            width: 100%;
+            position: relative;
+            transition: width 0.1s linear;
+            padding-top: 40vh; 
+        }
+
+        .scale-bar {
+            width: 100%;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: linear-gradient(to right, #e74c3c, #f1c40f, #2ecc71);
+            transition: border-color 0.3s ease;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+        
+        /* --- ДЕЛЕНИЯ (МЕТКИ) (Без изменений) --- */
+        .division-container {
+            position: absolute;
+            width: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: translateX(-50%);
+            cursor: grab;
+            transition: left 0.3s ease, opacity 0.2s ease;
+            bottom: 10px; 
+        }
+
+        .division-container.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+            transition: none;
+            z-index: 1000;
+        }
+        
+        .division-btn-controls {
+            display: none; 
+            position: absolute;
+            top: -15px; 
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            gap: 8px;
+            height: 24px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .division-container:hover .division-btn-controls,
+        .division-container:focus-within .division-btn-controls {
+            opacity: 1;
+        }
+
+        .division-btn-controls button {
+            width: 24px;
+            height: 24px;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        
+        #add-image-btn {
+            background-color: #007bff;
+        }
+        
+        #remove-division-btn {
+            background-color: #e74c3c;
+        }
+        
+        .division-container.has-image #add-image-btn {
+            display: none;
+        }
+        
+        .division-stem {
+            width: 3px;
+            background-color: var(--border-color);
+            transition: background-color 0.3s ease, height 0.3s ease;
+        }
+        
+        .division-container input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            background-color: var(--input-bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--input-border-color);
+            border-radius: 5px;
+            text-align: center;
+            box-sizing: border-box;
+            font-size: 14px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            z-index: 2;
+            order: 2;
+        }
+
+        .image-container {
+            width: 100%;
+            margin-bottom: 5px;
+            position: relative;
+            order: 0;
+        }
+        
+        .image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+            border: 1px solid var(--input-border-color);
+            display: block;
+        }
+        
+        .remove-image-btn {
+            display: none;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(231, 76, 60, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .division-container.has-image:hover .remove-image-btn {
+            display: block;
+        }
+
+        /* --- МОДАЛЬНОЕ ОКНО ПОМОЩИ (Без изменений) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--modal-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        
+        .modal-content {
+            background-color: var(--modal-content-bg);
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+            line-height: 1.6;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+        
+        .modal-content h2 {
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
 
-<button id="theme-toggle-btn" title="Переключить тему">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM12 20V4C16.4183 4 20 7.58172 20 12C20 16.4183 16.4183 20 12 20Z"/>
-    </svg>
-</button>
+    <nav class="sidebar">
+        
+        <div class="sidebar-group">
+            <button id="theme-toggle-btn" class="sidebar-btn" title="Переключить тему">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM12 20V4C16.4183 4 20 7.58172 20 12C20 16.4183 16.4183 20 12 20Z"/>
+                </svg>
+                <span>Тема</span>
+            </button>
+            <button id="help-btn" class="sidebar-btn" title="Помощь">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v2h-2V7zm0 4h2v6h-2v-6z"/>
+                </svg>
+                <span>Помощь</span>
+            </button>
+        </div>
 
-<main class="main-content-wrapper">
-    <div class="controls-sidebar">
-        <button id="addButton">Добавить</button>
-        <button id="removeButton">Удалить</button>
+        <div class="sidebar-spacer"></div>
+
+        <div class="sidebar-group">
+            <div class="sidebar-header"><span>Элементы</span></div>
+            <button id="addButton" class="sidebar-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+                <span>Добавить</span>
+            </button>
+        </div>
+        
+        <div class="sidebar-group">
+            <div class="sidebar-header"><span>Масштаб</span></div>
+            <label for="zoom-slider" class="sidebar-label-with-icon">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zm.5-7H9v2H7v1h2v2h1v-2h2V9h-2V7z"/>
+                </svg>
+                <span>Приближение</span>
+            </label>
+            <input type="range" id="zoom-slider" min="1" max="10" step="0.1" value="1">
+        </div>
+
+    </nav>
+
+    <main class="content-area">
+        <div class="scroll-wrapper" id="scrollWrapper">
+            <div class="scale-panning-container" id="scalePanningContainer">
+                <div class="scale-bar" id="scaleBar">
+                    </div>
+            </div>
+        </div>
+    </main>
+    
+    <div id="help-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close" id="modalClose">&times;</span>
+            <h2>Как пользоваться сайтом</h2>
+            <ul>
+                <li><b>Добавить:</b> Кнопка "+" на левой панели добавляет новый элемент.</li>
+                <li><b>Удалить:</b> Наведите курсор на элемент, появится красный крестик $(\times)$. Нажмите, чтобы удалить элемент.</li>
+                <li><b>Перемещение:</b> Нажмите и удерживайте текстовое поле, чтобы перетащить его на новую позицию.</li>
+                <li><b>Редактирование:</b> Просто кликните на текстовое поле и начните печатать.</li>
+                <li><b>Масштаб:</b> Используйте ползунок "Приближение" на левой панели, чтобы растянуть шкалу.</li>
+                <li><b>Добавление картинки:</b> Наведите курсор на текстовое поле, и над ним появится синяя кнопка "+". Скопируйте картинку и нажмите на "+", чтобы вставить ее.</li>
+                <li><b>Удаление картинки:</b> Наведите курсор на картинку, и в ее правом верхнем углу появится кнопка "x".</li>
+                <li><b>Сохранение:</b> Все изменения (порядок, текст, изображения) сохраняются автоматически.</li>
+            </ul>
+        </div>
     </div>
-    <div class="scale-container">
-        <span class="scale-label">0</span>
-        <div class="scale-bar" id="scaleBar"></div>
-        <span class="scale-label">10</span>
-    </div>
-</main>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const scaleBar = document.getElementById('scaleBar');
-    const addButton = document.getElementById('addButton');
-    const removeButton = document.getElementById('removeButton');
-    const themeToggleButton = document.getElementById('theme-toggle-btn');
 
-    let divisionsData = JSON.parse(localStorage.getItem('divisionsData')) || ["Плохо", "Не очень", "Mid", "Хорошо", "Отлично"];
-    let draggedElement = null;
-    let draggedIndex = null;
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const scaleBar = document.getElementById('scaleBar');
+            const addButton = document.getElementById('addButton');
+            // const removeButton = document.getElementById('removeButton'); // Удалено
+            const themeToggleButton = document.getElementById('theme-toggle-btn');
+            const helpBtn = document.getElementById('help-btn');
+            const helpModal = document.getElementById('help-modal');
+            const modalClose = document.getElementById('modalClose');
+            const zoomSlider = document.getElementById('zoom-slider');
+            const scalePanningContainer = document.getElementById('scalePanningContainer');
 
-    const saveDivisions = () => localStorage.setItem('divisionsData', JSON.stringify(divisionsData));
-    const applyTheme = (theme) => document.body.classList.toggle('dark-mode', theme === 'dark');
+            let divisionsData = [];
+            let draggedElement = null;
+            let draggedId = null;
+            let db = null;
 
-    themeToggleButton.addEventListener('click', () => {
-        const newTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
-        applyTheme(newTheme);
-        localStorage.setItem('theme', newTheme);
-    });
-    applyTheme(localStorage.getItem('theme') || 'light');
+            const DB_NAME = 'ScaleDB';
+            const STORE_NAME = 'divisions';
 
-    function getDivisionStyles(index, layoutParams) {
-        const { isOverlapping, maxLevels } = layoutParams;
-        const isUp = (index + 1) % 2 !== 0;
-        const positionClass = isUp ? 'position-up' : 'position-down';
-        let level = 0;
-        if (isOverlapping) {
-            const typeIndex = Math.floor(index / 2);
-            level = typeIndex % maxLevels;
-        }
-        const baseStemHeight = 40;
-        const rowHeight = 50;
-        const stemHeight = baseStemHeight + (level * rowHeight);
-        return { positionClass, stemHeight };
-    }
+            async function initDB() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(DB_NAME, 1);
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains(STORE_NAME)) {
+                            db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                        }
+                    };
+                    request.onsuccess = (event) => {
+                        db = event.target.result;
+                        resolve(db);
+                    };
+                    request.onerror = (event) => reject(event.target.errorCode);
+                });
+            }
 
-    function renderDivisions() {
-        scaleBar.innerHTML = '';
-        if (divisionsData.length === 0) return;
-        const segments = divisionsData.length + 1;
-        const scaleWidth = scaleBar.offsetWidth;
-        const segmentWidth = scaleWidth / segments;
-        const divisionNominalWidth = 120;
-        const isOverlapping = segmentWidth < divisionNominalWidth && divisionsData.length > 1;
-        const maxLevels = isOverlapping ? Math.ceil(divisionNominalWidth / segmentWidth) : 1;
-        const layoutParams = { isOverlapping, maxLevels };
+            async function loadData() {
+                return new Promise((resolve, reject) => {
+                    if (!db) return reject("DB not initialized");
+                    const transaction = db.transaction([STORE_NAME], 'readonly');
+                    const store = transaction.objectStore(STORE_NAME);
+                    const request = store.getAll();
+                    request.onsuccess = () => {
+                        // *** ИСПРАВЛЕНИЕ 3: Сортируем по сохраненному 'order' ***
+                        const data = request.result.sort((a, b) => a.order - b.order);
+                        resolve(data);
+                    };
+                    request.onerror = (event) => reject(event.target.errorCode);
+                });
+            }
 
-        divisionsData.forEach((text, index) => {
-            const container = document.createElement('div');
-            container.className = 'division-container';
-            container.draggable = true;
-            container.dataset.index = index;
+            async function saveData() {
+                if (!db) return;
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction([STORE_NAME], 'readwrite');
+                    const store = transaction.objectStore(STORE_NAME);
+                    store.clear().onsuccess = () => {
+                        if (divisionsData.length === 0) {
+                             resolve();
+                             return;
+                        }
+                        let count = 0;
+                        divisionsData.forEach((item, index) => {
+                            // *** ИСПРАВЛЕНИЕ 3: Добавляем/обновляем 'order' при сохранении ***
+                            item.order = index; 
+                            const request = store.put(item);
+                            request.onsuccess = () => {
+                                count++;
+                                if (count === divisionsData.length) {
+                                    resolve();
+                                }
+                            };
+                            request.onerror = (e) => reject(e.target.errorCode);
+                        });
+                    };
+                });
+            }
 
-            const { positionClass, stemHeight } = getDivisionStyles(index, layoutParams);
-            container.classList.add(positionClass);
-
-            const stem = document.createElement('div');
-            stem.className = 'division-stem';
-            stem.style.height = `${stemHeight}px`;
-
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = text;
-            input.addEventListener('input', (e) => {
-                divisionsData[index] = e.target.value;
-                saveDivisions();
+            const applyTheme = (theme) => document.body.classList.toggle('dark-mode', theme === 'dark');
+            themeToggleButton.addEventListener('click', () => {
+                const newTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+                applyTheme(newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+            applyTheme(localStorage.getItem('theme') || 'light');
+            
+            helpBtn.addEventListener('click', () => { helpModal.style.display = 'flex'; });
+            modalClose.addEventListener('click', () => { helpModal.style.display = 'none'; });
+            helpModal.addEventListener('click', (e) => {
+                if (e.target === helpModal) {
+                    helpModal.style.display = 'none';
+                }
             });
 
-            container.appendChild(stem);
-            container.appendChild(input);
-
-            const position = ((index + 1) / segments) * 100;
-            container.style.left = `${position}%`;
-            scaleBar.appendChild(container);
-        });
-        addDragAndDropHandlers();
-    }
-
-    function addDragAndDropHandlers() {
-        document.querySelectorAll('.division-container').forEach(div => {
-            div.addEventListener('dragstart', (e) => {
-                draggedElement = e.currentTarget;
-                draggedIndex = parseInt(draggedElement.dataset.index);
-                setTimeout(() => draggedElement.classList.add('dragging'), 0);
+            // *** ИСПРАВЛЕНИЕ 2: Баг с зумом ***
+            zoomSlider.addEventListener('input', (e) => {
+                const zoomLevel = e.target.value;
+                scalePanningContainer.style.width = `${zoomLevel * 100}%`;
+                // Вызываем рендер в setTimeout, чтобы браузер успел обновить offsetWidth
+                setTimeout(renderDivisions, 0); 
             });
-            div.addEventListener('dragend', () => {
-                if (draggedElement) draggedElement.classList.remove('dragging');
-                draggedElement = null;
-                draggedIndex = null;
-                saveDivisions();
+
+            function getDivisionStyles(index, layoutParams) {
+                const { isOverlapping, maxLevels } = layoutParams;
+                let level = 0;
+                if (isOverlapping) {
+                    level = index % maxLevels;
+                }
+                const baseStemHeight = 40;
+                const rowHeight = 60;
+                const stemHeight = baseStemHeight + (level * rowHeight);
+                return { stemHeight };
+            }
+
+            function renderDivisions() {
+                scaleBar.innerHTML = '';
+                if (divisionsData.length === 0) return;
+
+                const segments = divisionsData.length + 1;
+                const scaleWidth = scaleBar.offsetWidth;
+                const segmentWidth = scaleWidth / segments;
+                const divisionNominalWidth = 120;
+
+                const isOverlapping = segmentWidth < divisionNominalWidth && divisionsData.length > 1;
+                const maxLevels = isOverlapping ? Math.ceil(divisionNominalWidth / segmentWidth) : 1;
+                const layoutParams = { isOverlapping, maxLevels };
+
+                divisionsData.forEach((item, index) => {
+                    const container = document.createElement('div');
+                    container.className = 'division-container';
+                    container.draggable = true;
+                    container.dataset.id = item.id;
+                    if (item.image) {
+                        container.classList.add('has-image');
+                    }
+
+                    const { stemHeight } = getDivisionStyles(index, layoutParams);
+
+                    const imageContainer = document.createElement('div');
+                    imageContainer.className = 'image-container';
+                    if (item.image) {
+                        const img = document.createElement('img');
+                        img.src = URL.createObjectURL(item.image);
+                        img.onload = () => URL.revokeObjectURL(img.src);
+                        imageContainer.appendChild(img);
+                        
+                        const removeImgBtn = document.createElement('button');
+                        removeImgBtn.className = 'remove-image-btn';
+                        removeImgBtn.innerHTML = '&times;';
+                        removeImgBtn.title = 'Удалить картинку';
+                        removeImgBtn.addEventListener('click', () => {
+                            item.image = null;
+                            saveData().then(renderDivisions);
+                        });
+                        imageContainer.appendChild(removeImgBtn);
+                    }
+                    container.appendChild(imageContainer);
+                    
+                    // *** ИСПРАВЛЕНИЕ 1: Новые кнопки +/- ***
+                    const btnControls = document.createElement('div');
+                    btnControls.className = 'division-btn-controls';
+                    
+                    const addImgBtn = document.createElement('button');
+                    addImgBtn.id = 'add-image-btn';
+                    addImgBtn.innerHTML = '+';
+                    addImgBtn.title = 'Вставить картинку из буфера обмена';
+                    addImgBtn.addEventListener('click', () => handleImagePaste(item.id));
+                    btnControls.appendChild(addImgBtn);
+                    
+                    const removeDivBtn = document.createElement('button');
+                    removeDivBtn.id = 'remove-division-btn';
+                    removeDivBtn.innerHTML = '&times;';
+                    removeDivBtn.title = 'Удалить элемент';
+                    removeDivBtn.addEventListener('click', () => {
+                        handleRemoveDivision(item.id);
+                    });
+                    btnControls.appendChild(removeDivBtn);
+                    
+                    container.appendChild(btnControls);
+
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = item.text;
+                    input.addEventListener('change', () => {
+                        item.text = input.value;
+                        saveData();
+                    });
+                    container.appendChild(input);
+
+                    const stem = document.createElement('div');
+                    stem.className = 'division-stem';
+                    stem.style.height = `${stemHeight}px`;
+                    stem.style.order = "4"; 
+                    container.appendChild(stem);
+                    
+                    const position = ((index + 1) / segments) * 100;
+                    container.style.left = `${position}%`;
+                    scaleBar.appendChild(container);
+                });
+                
+                addDragAndDropHandlers();
+            }
+            
+            async function handleImagePaste(id) {
+                try {
+                    const permission = await navigator.permissions.query({ name: 'clipboard-read' });
+                    if (permission.state === 'denied') {
+                        throw new Error('Доступ к буферу обмена запрещен.');
+                    }
+                    
+                    const clipboardItems = await navigator.clipboard.read();
+                    const imageItem = clipboardItems.find(item => item.types.some(type => type.startsWith("image/")));
+                    
+                    if (!imageItem) {
+                        alert('Картинка не найдена в буфере обмена.');
+                        return;
+                    }
+                    
+                    const blob = await imageItem.getType(imageItem.types.find(t => t.startsWith("image/")));
+                    
+                    const item = divisionsData.find(d => d.id === id);
+                    if (item) {
+                        item.image = blob;
+                        await saveData();
+                        renderDivisions();
+                    }
+                } catch (err) {
+                    console.error('Ошибка вставки:', err);
+                    alert('Не удалось вставить картинку. ' + err.message);
+                }
+            }
+            
+            // *** ИСПРАВЛЕНИЕ 1: Функция удаления элемента ***
+            async function handleRemoveDivision(id) {
+                divisionsData = divisionsData.filter(item => item.id !== id);
+                await saveData();
+                renderDivisions();
+            }
+            
+            function addDragAndDropHandlers() {
+                document.querySelectorAll('.division-container').forEach(div => {
+                    div.addEventListener('dragstart', (e) => {
+                        // Запрещаем drag, если клик был по кнопке
+                        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') {
+                            e.preventDefault();
+                            return;
+                        }
+                        draggedElement = e.currentTarget;
+                        draggedId = Number(draggedElement.dataset.id);
+                        setTimeout(() => draggedElement.classList.add('dragging'), 0);
+                    });
+                    
+                    div.addEventListener('dragend', () => {
+                        if (!draggedElement) return;
+                        draggedElement.classList.remove('dragging');
+                        draggedElement = null;
+                        draggedId = null;
+                        saveData().then(renderDivisions);
+                    });
+                });
+            }
+
+            function getLayoutParams() {
+                const segments = (divisionsData.length || 0) + 1;
+                const scaleWidth = scaleBar.offsetWidth;
+                const segmentWidth = scaleWidth / segments;
+                const divisionNominalWidth = 120;
+                const isOverlapping = segmentWidth < divisionNominalWidth && divisionsData.length > 1;
+                const maxLevels = isOverlapping ? Math.ceil(divisionNominalWidth / segmentWidth) : 1;
+                return { isOverlapping, maxLevels };
+            }
+
+            scaleBar.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                if (!draggedElement) return;
+
+                const scaleRect = scaleBar.getBoundingClientRect();
+                const mouseX = e.clientX - scaleRect.left;
+                const segmentWidth = scaleRect.width / (divisionsData.length + 1);
+                
+                let targetIndex = Math.floor(mouseX / segmentWidth);
+                targetIndex = Math.max(0, Math.min(divisionsData.length - 1, targetIndex));
+                
+                const currentIndex = divisionsData.findIndex(item => item.id === draggedId);
+                
+                if (targetIndex !== currentIndex) {
+                    const item = divisionsData.splice(currentIndex, 1)[0];
+                    divisionsData.splice(targetIndex, 0, item);
+                }
+
+                const layoutParams = getLayoutParams();
+                divisionsData.forEach((item, index) => {
+                    const el = scaleBar.querySelector(`.division-container[data-id="${item.id}"]`);
+                    if (el) {
+                        const newPosition = ((index + 1) / (divisionsData.length + 1)) * 100;
+                        if (item.id !== draggedId) {
+                            el.style.left = `${newPosition}%`;
+                        }
+                        
+                        const { stemHeight } = getDivisionStyles(index, layoutParams);
+                        
+                        el.className = 'division-container'; 
+                        if (item.id === draggedId) {
+                            el.classList.add('dragging');
+                        }
+                        if (item.image) {
+                            el.classList.add('has-image');
+                        }
+                        el.querySelector('.division-stem').style.height = `${stemHeight}px`;
+                    }
+                });
+                
+                draggedElement.style.left = `${mouseX}px`;
+            });
+            
+            addButton.addEventListener('click', async () => {
+                const newItem = {
+                    id: Date.now(),
+                    text: "Новый",
+                    image: null,
+                    order: divisionsData.length // *** ИСПРАВЛЕНИЕ 3: Добавляем 'order' ***
+                };
+                divisionsData.push(newItem);
+                await saveData();
                 renderDivisions();
             });
+
+            // removeButton.addEventListener('click', ...); // Удалено
+
+            async function main() {
+                try {
+                    await initDB();
+                    const data = await loadData();
+                    if (data.length > 0) {
+                        divisionsData = data;
+                    } else {
+                        // *** ИСПРАВЛЕНИЕ 3: Добавляем 'order' в данные по умолчанию ***
+                        divisionsData = [
+                            { id: 1, text: "Плохо", image: null, order: 0 },
+                            { id: 2, text: "Не очень", image: null, order: 1 },
+                            { id: 3, text: "Mid", image: null, order: 2 },
+                            { id: 4, text: "Отлично", image: null, order: 3 }
+                        ];
+                        await saveData();
+                    }
+                } catch (err) {
+                    console.error("Не удалось загрузить данные:", err);
+                     divisionsData = [
+                        { id: 1, text: "Плохо", image: null, order: 0 },
+                        { id: 2, text: "Не очень", image: null, order: 1 },
+                        { id: 3, text: "Mid", image: null, order: 2 },
+                        { id: 4, "text": "Отлично", image: null, order: 3 }
+                    ];
+                }
+                renderDivisions();
+            }
+
+            main();
+            // *** ИСПРАВЛЕНИЕ 2: Оборачиваем ресайз в setTimeout ***
+            window.addEventListener('resize', () => {
+                setTimeout(renderDivisions, 0);
+            });
         });
-    }
-
-    scaleBar.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        if (!draggedElement) return;
-        const scaleRect = scaleBar.getBoundingClientRect();
-        const mouseX = e.clientX - scaleRect.left;
-        const segmentWidth = scaleRect.width / (divisionsData.length + 1);
-        let targetIndex = Math.floor(mouseX / segmentWidth);
-        targetIndex = Math.max(0, Math.min(divisionsData.length - 1, targetIndex));
-        const previewData = [...divisionsData];
-        const item = previewData.splice(draggedIndex, 1)[0];
-        previewData.splice(targetIndex, 0, item);
-        document.querySelectorAll('.division-container').forEach((div, i) => {
-            const pos = ((previewData.indexOf(div.querySelector('input').value) + 1) / (previewData.length + 1)) * 100;
-            div.style.left = `${pos}%`;
-        });
-    });
-
-    scaleBar.addEventListener('drop', (e) => {
-        e.preventDefault();
-        if (draggedIndex === null) return;
-        const scaleRect = scaleBar.getBoundingClientRect();
-        const mouseX = e.clientX - scaleRect.left;
-        const segmentWidth = scaleRect.width / (divisionsData.length + 1);
-        let targetIndex = Math.floor(mouseX / segmentWidth);
-        targetIndex = Math.max(0, Math.min(divisionsData.length - 1, targetIndex));
-        const item = divisionsData.splice(draggedIndex, 1)[0];
-        divisionsData.splice(targetIndex, 0, item);
-        saveDivisions();
-        renderDivisions();
-    });
-
-    addButton.addEventListener('click', () => {
-        divisionsData.push("Новый");
-        saveDivisions();
-        renderDivisions();
-    });
-    removeButton.addEventListener('click', () => {
-        if (divisionsData.length > 0) {
-            divisionsData.pop();
-            saveDivisions();
-            renderDivisions();
-        }
-    });
-
-    renderDivisions();
-    window.addEventListener('resize', renderDivisions);
-});
-</script>
+    </script>
 </body>
 </html>
-
-
-

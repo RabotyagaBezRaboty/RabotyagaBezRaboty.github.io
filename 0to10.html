@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
-    <title>0 to 10</title>
+    <title>шкала</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
         :root {
             --bg-color: #f0f2f5;
@@ -48,13 +49,12 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* --- БОКОВАЯ ПАНЕЛЬ (ИСПРАВЛЕНО) --- */
         .sidebar {
-            width: 70px; 
+            width: 70px;
             flex-shrink: 0;
             background-color: var(--sidebar-dark-bg);
             color: var(--sidebar-text);
-            padding: 20px 10px; /* ИЗМЕНЕНО: Уменьшили боковые отступы до 10px */
+            padding: 20px 10px;
             display: flex;
             flex-direction: column;
             z-index: 100;
@@ -84,10 +84,10 @@
             border-bottom: 1px solid #495057;
             padding-bottom: 5px;
             white-space: nowrap;
-            opacity: 0; /* Скрыт */
+            opacity: 0; 
         }
 
-        .sidebar button, .sidebar-btn, .sidebar-label-with-icon {
+        .sidebar-item {
             padding: 10px 12px;
             font-size: 14px;
             border: none;
@@ -98,69 +98,98 @@
             text-align: left;
             display: flex;
             align-items: center;
-            gap: 0; /* ИЗМЕНЕНО: Убран отступ */
+            gap: 0;
             background-color: #495057;
             white-space: nowrap;
             overflow: hidden;
-            justify-content: center; /* Центрируем иконку */
+            justify-content: center;
         }
         
-        .sidebar-btn svg, .sidebar-label-with-icon svg {
+        .sidebar-item:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background-color: #495057;
+        }
+        
+        .sidebar-item svg {
             width: 18px;
             height: 18px;
             fill: var(--sidebar-text);
             flex-shrink: 0; 
         }
 
-        .sidebar button span, .sidebar-btn span, .sidebar-label-with-icon span {
-            display: none; /* ИЗМЕНЕНО: Полностью скрываем текст (вместо opacity: 0) */
+        .sidebar-item span {
+            display: none;
         }
 
-        .sidebar button:hover, .sidebar-btn:hover, .sidebar-label-with-icon:hover {
+        .sidebar-item:not(:disabled):hover {
             background-color: #5a6268;
         }
         
-        .sidebar button:active, .sidebar-btn:active, .sidebar-label-with-icon:active {
+        .sidebar-item:active {
             transform: scale(0.98);
         }
 
         #addButton { background-color: #2ecc71; }
         #addButton:hover { background-color: #27ae60; }
+        #resetButton { background-color: #e74c3c; }
+        #resetButton:hover { background-color: #c0392b; }
 
-        label[for="zoom-slider"] {
-            font-size: 0.9em;
-            color: #adb5bd;
-            white-space: nowrap;
-        }
-        
-        /* --- ИЗМЕНЕНО: Стили ползунка (полностью) --- */
         #zoom-slider {
-            width: 20px; /* Ширина (толщина) ползунка */
-            height: 120px; /* Высота ползунка */
+            width: 20px;
+            height: 120px;
             cursor: pointer;
             opacity: 1;
             transition: opacity 0.2s ease;
-            
-            /* --- Новый метод: appearance --- */
-            -webkit-appearance: slider-vertical; /* Для Chrome/Safari/Edge */
-            appearance: slider-vertical; /* Стандарт */
+            -webkit-appearance: slider-vertical;
+            appearance: slider-vertical;
             
             display: block; 
-            margin: 15px auto 0 auto; /* Центрирование */
+            margin: 15px auto 0 auto;
         }
 
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-        /* --- ОСНОВНАЯ ЗОНА КОНТЕНТА (Без изменений) --- */
+        #scale-title {
+            width: 100%;
+            border: none;
+            background: none;
+            color: var(--text-color);
+            font-size: 2.5em;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px 40px 10px 40px;
+            outline: none;
+            white-space: nowrap;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        #scale-title:empty:before {
+            content: attr(data-placeholder);
+            color: var(--input-border-color);
+            font-weight: normal;
+        }
+
         .content-area {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            height: 100vh; 
-            padding: 20px 40px; 
+            padding: 0 40px 20px 40px;
             overflow: hidden;
+            transition: justify-content 0.4s ease;
         }
         
+        .content-area.view-mode-center {
+            justify-content: center;
+        }
+
         .scroll-wrapper {
             width: 100%;
             overflow-x: auto;
@@ -170,8 +199,10 @@
         .scale-panning-container {
             width: 100%;
             position: relative;
-            transition: width 0.1s linear;
-            padding-top: 90vh; 
+            transition: width 0.1s linear, padding 0.4s ease;
+        }
+        
+        .content-area.view-mode-center .scale-panning-container {
         }
 
         .scale-bar {
@@ -180,23 +211,38 @@
             border: 2px solid var(--border-color);
             border-radius: 10px;
             background: linear-gradient(to right, #e74c3c, #f1c40f, #2ecc71);
-            transition: border-color 0.3s ease;
+            transition: border-color 0.3s ease, top 0.4s ease, bottom 0.4s ease, transform 0.4s ease;
             position: absolute;
             bottom: 0;
             left: 0;
+            transform: translateY(0);
         }
         
-        /* --- ДЕЛЕНИЯ (МЕТКИ) (Без изменений) --- */
+        .content-area.view-mode-center .scale-bar {
+            top: 50%;
+            bottom: auto;
+            transform: translateY(-50%);
+        }
+        
         .division-container {
             position: absolute;
             width: 120px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             transform: translateX(-50%);
-            cursor: grab;
-            transition: left 0.3s ease, opacity 0.2s ease;
-            bottom: 10px; 
+            transition: left 0.3s ease, opacity 0.2s ease, top 0.4s ease, bottom 0.4s ease;
+            pointer-events: none; 
+        }
+        
+        .division-container.position-up {
+            bottom: 10px;
+            flex-direction: column;
+        }
+        
+        .division-container.position-down {
+            top: 10px;
+            bottom: auto;
+            flex-direction: column-reverse;
         }
 
         .division-container.dragging {
@@ -207,8 +253,7 @@
         }
         
         .division-btn-controls {
-            display: none; 
-            position: absolute;
+            position: absolute; 
             top: -15px; 
             left: 50%;
             transform: translateX(-50%);
@@ -218,11 +263,19 @@
             height: 24px;
             opacity: 0;
             transition: opacity 0.2s ease;
+            pointer-events: none; 
         }
         
-        .division-container:hover .division-btn-controls,
-        .division-container:focus-within .division-btn-controls {
+        .position-down .division-btn-controls {
+            top: auto;
+            bottom: -15px;
+        }
+        
+        .division-container input[type="text"]:hover + .division-btn-controls,
+        .division-container input[type="text"]:focus + .division-btn-controls,
+        .division-btn-controls:hover { 
             opacity: 1;
+            pointer-events: auto; 
         }
 
         .division-btn-controls button {
@@ -238,24 +291,52 @@
             align-items: center;
             justify-content: center;
             padding: 0;
+            pointer-events: auto; 
         }
         
-        #add-image-btn {
+        #add-image-btn { 
             background-color: #007bff;
         }
         
-        #remove-division-btn {
+        #add-image-btn:hover {
+            background-color: #0056b3;
+        }
+        
+        #remove-image-from-div-btn {
+            background-color: #7f8c8d;
+            display: none;
+        }
+        
+        #remove-image-from-div-btn:hover {
+            background-color: #95a5a6;
+        }
+        
+        #remove-division-btn { 
             background-color: #e74c3c;
+        }
+        
+        #remove-division-btn:hover {
+            background-color: #c0392b;
         }
         
         .division-container.has-image #add-image-btn {
             display: none;
         }
         
+        .division-container.has-image #remove-image-from-div-btn {
+            display: flex;
+        }
+
+        
+        .remove-division-btn {
+            background-color: #e74c3c;
+        }
+        
         .division-stem {
             width: 3px;
             background-color: var(--border-color);
             transition: background-color 0.3s ease, height 0.3s ease;
+            pointer-events: none; 
         }
         
         .division-container input[type="text"] {
@@ -274,6 +355,12 @@
             position: relative;
             z-index: 2;
             order: 2;
+            cursor: grab;
+            pointer-events: auto; 
+        }
+        
+        .division-container.dragging input[type="text"] {
+            cursor: grabbing;
         }
 
         .image-container {
@@ -281,8 +368,14 @@
             margin-bottom: 5px;
             position: relative;
             order: 0;
+            pointer-events: none; 
         }
-        
+		
+        .division-container:hover {
+            z-index: 100;
+            transition-delay: 0s;
+        }
+		
         .image-container img {
             width: 100%;
             height: auto;
@@ -291,27 +384,6 @@
             display: block;
         }
         
-        .remove-image-btn {
-            display: none;
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            width: 20px;
-            height: 20px;
-            background-color: rgba(231, 76, 60, 0.8);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            font-weight: bold;
-            z-index: 10;
-        }
-
-        .division-container.has-image:hover .remove-image-btn {
-            display: block;
-        }
-
-        /* --- МОДАЛЬНОЕ ОКНО ПОМОЩИ (Без изменений) --- */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -350,6 +422,7 @@
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
         }
+        
     </style>
 </head>
 <body>
@@ -357,52 +430,86 @@
     <nav class="sidebar">
         
         <div class="sidebar-group">
-            <button id="theme-toggle-btn" class="sidebar-btn" title="Переключить тему">
+            <button id="theme-toggle-btn" class="sidebar-item" title="Переключить тему">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM12 20V4C16.4183 4 20 7.58172 20 12C20 16.4183 16.4183 20 12 20Z"/>
                 </svg>
-                <span>Тема</span>
             </button>
-            <button id="help-btn" class="sidebar-btn" title="Помощь">
+            <button id="help-btn" class="sidebar-item" title="Помощь">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v2h-2V7zm0 4h2v6h-2v-6z"/>
                 </svg>
-                <span>Помощь</span>
+			</button>
+            <button id="undo-btn" class="sidebar-item" title="Отменить (пока что фичи нет)" disabled>
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C20.08 11.03 16.63 8 12.5 8z"/>
+                 </svg>
+            </button>
+            <button id="redo-btn" class="sidebar-item" title="Вернуть (пока что фичи нет)" disabled>
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                     <path d="m 11.97,8c 2.65,0 5.05,0.99 6.9,2.6L 22.47,7v 9h -9l 3.62,-3.62C 15.7,11.22 13.93,10.5 11.97,10.5 8.43,10.5 5.42,12.81 4.37,16L 2,15.22C 4.39,11.03 7.84,8 11.97,8 Z"/>
+                 </svg>
             </button>
         </div>
 
         <div class="sidebar-spacer"></div>
 
         <div class="sidebar-group">
-            <div class="sidebar-header"><span>Элементы</span></div>
-            <button id="addButton" class="sidebar-btn">
+            <div class="sidebar-header"><span>Вид</span></div>
+            <button id="viewModeBottomBtn" class="sidebar-item" title="Вид: Снизу">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    <path d="M22 21H2V17H22V21ZM13 15H11V3H13V15Z"/>
                 </svg>
-                <span>Добавить</span>
+            </button>
+            <button id="viewModeCenterBtn" class="sidebar-item" title="Вид: По центру">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M22 11V13H2V11H22ZM13 19H11V5H13V19Z"/>
+                </svg>
             </button>
         </div>
         
         <div class="sidebar-group">
-            <div class="sidebar-header"><span>Масштаб</span></div>
-            <label for="zoom-slider" class="sidebar-label-with-icon">
+            <div class="sidebar-header"></div>
+            <button id="addButton" class="sidebar-item" title="Добавить">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+            </button>
+            <button id="resetButton" class="sidebar-item" title="Сбросить">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="sidebar-group">
+            <div class="sidebar-header"></div>
+            <button id="zoom-reset-btn" class="sidebar-item" title="Сбросить приближение">
                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zm.5-7H9v2H7v1h2v2h1v-2h2V9h-2V7z"/>
                 </svg>
-                <span>Приближение</span>
-            </label>
+            </button>
             <input type="range" id="zoom-slider" min="1" max="10" step="0.1" value="1">
+            <button id="screenshotButton" class="sidebar-item" title="Скриншот">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                </svg>
+            </button>
         </div>
 
     </nav>
 
-    <main class="content-area">
-        <div class="scroll-wrapper" id="scrollWrapper">
-            <div class="scale-panning-container" id="scalePanningContainer">
-                <div class="scale-bar" id="scaleBar">
-                    </div>
+    <main class="main-wrapper">
+        <div id="scale-title" contenteditable="true" data-placeholder="Введите заголовок..."></div>
+        
+        <main class="content-area" id="contentArea">
+            <div class="scroll-wrapper" id="scrollWrapper">
+                <div class="scale-panning-container" id="scalePanningContainer">
+                    <div class="scale-bar" id="scaleBar">
+                        </div>
+                </div>
             </div>
-        </div>
+        </main>
     </main>
     
     <div id="help-modal" class="modal-overlay" style="display: none;">
@@ -410,14 +517,15 @@
             <span class="modal-close" id="modalClose">&times;</span>
             <h2>Как пользоваться сайтом</h2>
             <ul>
+                <li><b>Заголовок:</b> Кликните на текст "Введите заголовок...", чтобы его изменить.</li>
                 <li><b>Добавить:</b> Кнопка "+" на левой панели добавляет новый элемент.</li>
-                <li><b>Удалить:</b> Наведите курсор на элемент, появится красный крестик $(\times)$. Нажмите, чтобы удалить элемент.</li>
+                <li><b>Удалить:</b> Наведите курсор на элемент, появится красный крестик. Нажмите, чтобы удалить элемент.</li>
                 <li><b>Перемещение:</b> Нажмите и удерживайте текстовое поле, чтобы перетащить его на новую позицию.</li>
-                <li><b>Редактирование:</b> Просто кликните на текстовое поле и начните печатать.</li>
+                <li><b>Вид:</b> Кнопки по центру левой панели меняют компоновку шкалы.</li>
                 <li><b>Масштаб:</b> Используйте ползунок "Приближение" на левой панели, чтобы растянуть шкалу.</li>
-                <li><b>Добавление картинки:</b> Наведите курсор на текстовое поле, и над ним появится синяя кнопка "+". Скопируйте картинку и нажмите на "+", чтобы вставить ее.</li>
-                <li><b>Удаление картинки:</b> Наведите курсор на картинку, и в ее правом верхнем углу появится кнопка "x".</li>
-                <li><b>Сохранение:</b> Все изменения (порядок, текст, изображения) сохраняются автоматически.</li>
+                <li><b>Скриншот:</b> Кнопка "Камера" делает снимок всей вашей шкалы включая заголовок (снимется вся шкала, даже если она растянута за пределы монитора) и скачивает его.</li>
+                <li><b>Картинки:</b> Наведите курсор на текстовое поле, и над ним появится синяя кнопка "+". Скопируйте картинку и нажмите на "+", чтобы вставить ее. Чтобы её убрать, нажмите на серую кнопку с минусом.</li>
+                <li><b>Сохранение:</b> Все изменения (порядок, текст, изображения, вид, заголовок) сохраняются автоматически.</li>
             </ul>
         </div>
     </div>
@@ -426,21 +534,30 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
+            const contentArea = document.getElementById('contentArea');
             const scaleBar = document.getElementById('scaleBar');
             const addButton = document.getElementById('addButton');
-            // const removeButton = document.getElementById('removeButton'); // Удалено
             const themeToggleButton = document.getElementById('theme-toggle-btn');
             const helpBtn = document.getElementById('help-btn');
             const helpModal = document.getElementById('help-modal');
             const modalClose = document.getElementById('modalClose');
             const zoomSlider = document.getElementById('zoom-slider');
             const scalePanningContainer = document.getElementById('scalePanningContainer');
-
+            const viewModeBottomBtn = document.getElementById('viewModeBottomBtn');
+            const viewModeCenterBtn = document.getElementById('viewModeCenterBtn');
+            const scaleTitle = document.getElementById('scale-title');
+            const resetButton = document.getElementById('resetButton');
+            const screenshotButton = document.getElementById('screenshotButton');
+			const zoomResetBtn = document.getElementById('zoom-reset-btn'); 
+			const undoBtn = document.getElementById('undo-btn');
+            const redoBtn = document.getElementById('redo-btn');
             let divisionsData = [];
             let draggedElement = null;
             let draggedId = null;
             let db = null;
-
+            let currentViewMode = 'bottom';
+            const MAX_TITLE_FONT_SIZE = 2.5;
+            const MIN_TITLE_FONT_SIZE = 0.8;
             const DB_NAME = 'ScaleDB';
             const STORE_NAME = 'divisions';
 
@@ -468,7 +585,6 @@
                     const store = transaction.objectStore(STORE_NAME);
                     const request = store.getAll();
                     request.onsuccess = () => {
-                        // *** ИСПРАВЛЕНИЕ 3: Сортируем по сохраненному 'order' ***
                         const data = request.result.sort((a, b) => a.order - b.order);
                         resolve(data);
                     };
@@ -488,7 +604,6 @@
                         }
                         let count = 0;
                         divisionsData.forEach((item, index) => {
-                            // *** ИСПРАВЛЕНИЕ 3: Добавляем/обновляем 'order' при сохранении ***
                             item.order = index; 
                             const request = store.put(item);
                             request.onsuccess = () => {
@@ -502,6 +617,26 @@
                     };
                 });
             }
+            
+            function getDefaultData() {
+                 return [
+                    { id: 1, text: "Плохо", image: null, order: 0 },
+                    { id: 2, text: "Не очень", image: null, order: 1 },
+                    { id: 3, text: "Mid", image: null, order: 2 },
+                    { id: 4, text: "Отлично", image: null, order: 3 }
+                ];
+            }
+            
+            async function resetDataToDefault() {
+                if (confirm("Вы уверены, что хотите сбросить всю шкалу? Это действие необратимо.")) {
+                    divisionsData = getDefaultData();
+                    await saveData();
+                    scaleTitle.innerText = '';
+                    localStorage.removeItem('scaleTitle');
+                    adjustTitleFontSize();
+                    renderDivisions();
+                }
+            }
 
             const applyTheme = (theme) => document.body.classList.toggle('dark-mode', theme === 'dark');
             themeToggleButton.addEventListener('click', () => {
@@ -509,7 +644,6 @@
                 applyTheme(newTheme);
                 localStorage.setItem('theme', newTheme);
             });
-            applyTheme(localStorage.getItem('theme') || 'light');
             
             helpBtn.addEventListener('click', () => { helpModal.style.display = 'flex'; });
             modalClose.addEventListener('click', () => { helpModal.style.display = 'none'; });
@@ -518,81 +652,292 @@
                     helpModal.style.display = 'none';
                 }
             });
+            
+            function adjustTitleFontSize() {
+                const el = scaleTitle;
+                let currentFontSize = MAX_TITLE_FONT_SIZE;
+                el.style.fontSize = currentFontSize + 'em'; 
+                
+                if (el.clientWidth === 0) return; 
+                
+                while (el.scrollWidth > el.clientWidth && currentFontSize > MIN_TITLE_FONT_SIZE) {
+                    currentFontSize -= 0.1;
+                    el.style.fontSize = currentFontSize + 'em';
+                }
+            }
+            
+            scaleTitle.addEventListener('input', () => {
+                adjustTitleFontSize();
+                localStorage.setItem('scaleTitle', scaleTitle.innerText);
+            });
+            
 
-            // *** ИСПРАВЛЕНИЕ 2: Баг с зумом ***
             zoomSlider.addEventListener('input', (e) => {
                 const zoomLevel = e.target.value;
                 scalePanningContainer.style.width = `${zoomLevel * 100}%`;
-                // Вызываем рендер в setTimeout, чтобы браузер успел обновить offsetWidth
                 setTimeout(renderDivisions, 0); 
             });
+
+            zoomResetBtn.addEventListener('click', () => {
+                zoomSlider.value = "1";
+                scalePanningContainer.style.width = `100%`;
+                setTimeout(renderDivisions, 0);
+            });
+
+            function applyViewMode(mode) {
+                currentViewMode = mode;
+                contentArea.classList.toggle('view-mode-center', mode === 'center');
+                viewModeBottomBtn.disabled = (mode === 'bottom');
+                viewModeCenterBtn.disabled = (mode === 'center');
+            }
+
+            function setAndSaveViewMode(mode) {
+                applyViewMode(mode);
+                localStorage.setItem('viewMode', mode);
+                renderDivisions();
+            }
+
+            viewModeBottomBtn.addEventListener('click', () => setAndSaveViewMode('bottom'));
+            viewModeCenterBtn.addEventListener('click', () => setAndSaveViewMode('center'));
+            
+            function blobToDataURL(blob) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+            }
+
+            async function takeScreenshot() {
+                const titleEl = document.getElementById('scale-title');
+                const scaleContainerEl = document.getElementById('scalePanningContainer');
+                const titleValue = titleEl.innerText.trim();
+                
+                const captureDiv = document.createElement('div');
+                captureDiv.style.position = 'absolute';
+                captureDiv.style.left = '-9999px';
+                captureDiv.style.width = Math.max(scaleContainerEl.scrollWidth, titleEl.scrollWidth) + 40 + 'px'; 
+                captureDiv.style.padding = '20px';
+                captureDiv.style.display = 'flex';
+                captureDiv.style.flexDirection = 'column';
+                captureDiv.style.alignItems = 'center';
+                
+                const bgColor = getComputedStyle(document.body).backgroundColor;
+                captureDiv.style.background = bgColor;
+
+                if (titleValue !== '') {
+                    const titleClone = titleEl.cloneNode(true);
+                    titleClone.style.fontSize = scaleTitle.style.fontSize;
+                    titleClone.style.width = '100%';
+                    titleClone.style.color = getComputedStyle(titleEl).color;
+                    titleClone.style.marginBottom = '0px';
+                    titleClone.style.padding = '20px 0 10px 0';
+                    captureDiv.appendChild(titleClone);
+                    
+                }
+                
+                const scaleClone = scaleContainerEl.cloneNode(true);
+                scaleClone.style.width = '100%';
+                if (currentViewMode === 'center') {
+                    scaleClone.style.paddingTop = '0px'; 
+                } 
+                scaleClone.style.paddingBottom = getComputedStyle(scaleContainerEl).paddingBottom || '0px'; 
+
+                const allInputs = scaleClone.querySelectorAll('input[type="text"]');
+                allInputs.forEach(input => {
+                    const style = getComputedStyle(input);
+                    const text = input.value;
+                    const parent = input.parentNode;
+                    
+                    const div = document.createElement('div');
+                    div.innerText = text;
+                    div.className = 'screenshot-text-div-replacement'; 
+                    div.style.width = style.width;
+                    div.style.height = style.height;
+                    div.style.padding = style.padding;
+                    div.style.margin = style.margin;
+                    div.style.boxSizing = style.boxSizing;
+                    div.style.order = style.order; 
+                    
+                    const computedBodyStyle = getComputedStyle(document.body);
+                    const inputBgColor = computedBodyStyle.getPropertyValue('--input-bg-color').trim() || '#2a2a2a'; 
+                    const inputBorderColor = computedBodyStyle.getPropertyValue('--input-border-color').trim() || '#555';
+                    const textColor = computedBodyStyle.getPropertyValue('--text-color').trim() || '#e0e0e0';
+
+                    div.style.backgroundColor = inputBgColor; 
+                    div.style.border = `1px solid ${inputBorderColor}`;
+                    div.style.borderRadius = style.borderRadius; 
+
+                    div.style.color = textColor; 
+                    div.style.fontSize = style.fontSize;
+                    div.style.textAlign = style.textAlign; 
+                    
+                    div.style.display = 'flex'; 
+                    div.style.alignItems = 'center'; 
+                    div.style.justifyContent = 'center'; 
+                    
+                    div.style.pointerEvents = 'none'; 
+                    div.style.cursor = 'default';
+                    
+                    parent.insertBefore(div, input);
+                    parent.removeChild(input);
+                });
+
+
+                const allImgTags = scaleClone.querySelectorAll('.image-container img');
+                const conversionPromises = [];
+                
+                allImgTags.forEach(imgTag => {
+                    const container = imgTag.closest('.division-container');
+                    if (container) {
+                        const id = Number(container.dataset.id);
+                        const item = divisionsData.find(d => d.id === id);
+                        if (item && item.image) {
+                            conversionPromises.push(
+                                blobToDataURL(item.image).then(dataUrl => {
+                                    imgTag.src = dataUrl;
+                                })
+                            );
+                        }
+                    }
+                });
+
+                await Promise.all(conversionPromises);
+                
+                captureDiv.appendChild(scaleClone);
+                document.body.appendChild(captureDiv);
+
+                try {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    const canvas = await html2canvas(captureDiv, {
+                        useCORS: true,
+                        width: captureDiv.scrollWidth, 
+                        height: captureDiv.scrollHeight,
+                        windowWidth: captureDiv.scrollWidth,
+                        windowHeight: captureDiv.scrollHeight,
+                        backgroundColor: bgColor
+                    });
+                    
+                    const a = document.createElement('a');
+                    a.href = canvas.toDataURL('image/png');
+                    a.download = (titleValue || 'scale') + '.png';
+                    a.click();
+                    
+                } catch (err) {
+                    console.error('Ошибка скриншота:', err);
+                    alert('Не удалось сделать скриншот.');
+                } finally {
+                    document.body.removeChild(captureDiv);
+                }
+            }
+            
+            screenshotButton.addEventListener('click', takeScreenshot);
+            resetButton.addEventListener('click', resetDataToDefault);
 
             function getDivisionStyles(index, layoutParams) {
                 const { isOverlapping, maxLevels } = layoutParams;
                 let level = 0;
-                if (isOverlapping) {
+                let positionClass = '';
+
+                if (currentViewMode === 'center') {
+                    const isUp = (index + 1) % 2 !== 0;
+                    positionClass = isUp ? 'position-up' : 'position-down';
+                    const typeIndex = isUp ? Math.floor(index / 2) : Math.floor(index / 2);
+                    level = typeIndex % maxLevels;
+                } else { 
+                    positionClass = 'position-up';
                     level = index % maxLevels;
                 }
+
                 const baseStemHeight = 40;
                 const rowHeight = 60;
                 const stemHeight = baseStemHeight + (level * rowHeight);
-                return { stemHeight };
+                return { stemHeight, positionClass, level }
+            }
+
+            function getLayoutParams() {
+                const segments = (divisionsData.length || 0) + 1;
+                const scaleWidth = scaleBar.offsetWidth;
+                const segmentWidth = scaleWidth / segments;
+                const divisionNominalWidth = 120;
+                const isOverlapping = segmentWidth < divisionNominalWidth && divisionsData.length > 1;
+                const maxLevels = isOverlapping ? Math.ceil(divisionNominalWidth / segmentWidth) : 1;
+                return { isOverlapping, maxLevels };
             }
 
             function renderDivisions() {
                 scaleBar.innerHTML = '';
-                if (divisionsData.length === 0) return;
-
-                const segments = divisionsData.length + 1;
-                const scaleWidth = scaleBar.offsetWidth;
-                const segmentWidth = scaleWidth / segments;
-                const divisionNominalWidth = 120;
-
-                const isOverlapping = segmentWidth < divisionNominalWidth && divisionsData.length > 1;
-                const maxLevels = isOverlapping ? Math.ceil(divisionNominalWidth / segmentWidth) : 1;
-                const layoutParams = { isOverlapping, maxLevels };
+                
+                const layoutParams = getLayoutParams();
+                let maxLevelUp = -1;
+                let maxLevelDown = -1;
+                const textElementHeight = 40; 
+                const imageElementHeight = 110; 
+                const rowHeight = 60; 
+                let dynamicLevelsUp = new Array(layoutParams.maxLevels).fill(0);
+                let dynamicLevelsDown = new Array(layoutParams.maxLevels).fill(0);
 
                 divisionsData.forEach((item, index) => {
                     const container = document.createElement('div');
                     container.className = 'division-container';
-                    container.draggable = true;
                     container.dataset.id = item.id;
                     if (item.image) {
                         container.classList.add('has-image');
                     }
 
-                    const { stemHeight } = getDivisionStyles(index, layoutParams);
+                    const { stemHeight, positionClass, level } = getDivisionStyles(index, layoutParams);
+                    container.classList.add(positionClass);
+                    
+                    const isImagePresent = !!item.image;
+                    const elementContentHeight = isImagePresent ? imageElementHeight : textElementHeight;
+                    
+                    if (positionClass === 'position-up') {
+                        dynamicLevelsUp[level] = Math.max(dynamicLevelsUp[level], elementContentHeight);
+                        maxLevelUp = Math.max(maxLevelUp, level);
+                    } else if (positionClass === 'position-down') {
+                        dynamicLevelsDown[level] = Math.max(dynamicLevelsDown[level], elementContentHeight);
+                        maxLevelDown = Math.max(maxLevelDown, level);
+                    }
+
 
                     const imageContainer = document.createElement('div');
                     imageContainer.className = 'image-container';
                     if (item.image) {
                         const img = document.createElement('img');
-                        img.src = URL.createObjectURL(item.image);
+                        img.src = URL.createObjectURL(item.image); 
                         img.onload = () => URL.revokeObjectURL(img.src);
                         imageContainer.appendChild(img);
-                        
-                        const removeImgBtn = document.createElement('button');
-                        removeImgBtn.className = 'remove-image-btn';
-                        removeImgBtn.innerHTML = '&times;';
-                        removeImgBtn.title = 'Удалить картинку';
-                        removeImgBtn.addEventListener('click', () => {
-                            item.image = null;
-                            saveData().then(renderDivisions);
-                        });
-                        imageContainer.appendChild(removeImgBtn);
                     }
                     container.appendChild(imageContainer);
-                    
-                    // *** ИСПРАВЛЕНИЕ 1: Новые кнопки +/- ***
-                    const btnControls = document.createElement('div');
+
+                    const input = document.createElement('input'); 
+                    input.type = 'text';
+                    input.value = item.text;
+                    input.draggable = true;
+                    input.addEventListener('change', () => {
+                        item.text = input.value;
+                        saveData();
+                    });
+                    container.appendChild(input);
+
+                    const btnControls = document.createElement('div'); 
                     btnControls.className = 'division-btn-controls';
-                    
                     const addImgBtn = document.createElement('button');
                     addImgBtn.id = 'add-image-btn';
                     addImgBtn.innerHTML = '+';
                     addImgBtn.title = 'Вставить картинку из буфера обмена';
                     addImgBtn.addEventListener('click', () => handleImagePaste(item.id));
                     btnControls.appendChild(addImgBtn);
+                    const removeImgFromDivBtn = document.createElement('button');
+                    removeImgFromDivBtn.id = 'remove-image-from-div-btn';
+                    removeImgFromDivBtn.innerHTML = '&#8722;';
+                    removeImgFromDivBtn.title = 'Удалить картинку';
+                    removeImgFromDivBtn.addEventListener('click', () => {
+                        item.image = null;
+                        saveData().then(renderDivisions);
+                    });
+                    btnControls.appendChild(removeImgFromDivBtn);
                     
                     const removeDivBtn = document.createElement('button');
                     removeDivBtn.id = 'remove-division-btn';
@@ -603,16 +948,7 @@
                     });
                     btnControls.appendChild(removeDivBtn);
                     
-                    container.appendChild(btnControls);
-
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.value = item.text;
-                    input.addEventListener('change', () => {
-                        item.text = input.value;
-                        saveData();
-                    });
-                    container.appendChild(input);
+                    container.appendChild(btnControls); 
 
                     const stem = document.createElement('div');
                     stem.className = 'division-stem';
@@ -620,11 +956,38 @@
                     stem.style.order = "4"; 
                     container.appendChild(stem);
                     
+                    const segments = divisionsData.length + 1;
                     const position = ((index + 1) / segments) * 100;
                     container.style.left = `${position}%`;
                     scaleBar.appendChild(container);
                 });
                 
+                
+                const baseStemHeight = 40;
+                const basePaddingPx = 150; 
+                
+                let totalHeightUp = 0;
+                let totalHeightDown = 0;
+
+                if (maxLevelUp > -1) {
+                    totalHeightUp = baseStemHeight + (maxLevelUp * rowHeight) + dynamicLevelsUp[maxLevelUp];
+                }
+                
+                if (currentViewMode === 'center' && maxLevelDown > -1) {
+                    totalHeightDown = baseStemHeight + (maxLevelDown * rowHeight) + dynamicLevelsDown[maxLevelDown];
+                }
+
+                let paddingTopPx = basePaddingPx + totalHeightUp;
+                let paddingBottomPx = currentViewMode === 'center' ? basePaddingPx + totalHeightDown : 0;
+                
+                if (divisionsData.length === 0) {
+                    paddingTopPx = basePaddingPx;
+                    paddingBottomPx = currentViewMode === 'center' ? basePaddingPx : 0;
+                }
+
+                scalePanningContainer.style.paddingTop = `${paddingTopPx}px`;
+                scalePanningContainer.style.paddingBottom = `${paddingBottomPx}px`;
+
                 addDragAndDropHandlers();
             }
             
@@ -657,7 +1020,6 @@
                 }
             }
             
-            // *** ИСПРАВЛЕНИЕ 1: Функция удаления элемента ***
             async function handleRemoveDivision(id) {
                 divisionsData = divisionsData.filter(item => item.id !== id);
                 await saveData();
@@ -665,19 +1027,14 @@
             }
             
             function addDragAndDropHandlers() {
-                document.querySelectorAll('.division-container').forEach(div => {
-                    div.addEventListener('dragstart', (e) => {
-                        // Запрещаем drag, если клик был по кнопке
-                        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') {
-                            e.preventDefault();
-                            return;
-                        }
-                        draggedElement = e.currentTarget;
+                document.querySelectorAll('.division-container input[type="text"]').forEach(input => {
+                    input.addEventListener('dragstart', (e) => {
+                        draggedElement = e.currentTarget.closest('.division-container');
                         draggedId = Number(draggedElement.dataset.id);
                         setTimeout(() => draggedElement.classList.add('dragging'), 0);
                     });
                     
-                    div.addEventListener('dragend', () => {
+                    input.addEventListener('dragend', () => {
                         if (!draggedElement) return;
                         draggedElement.classList.remove('dragging');
                         draggedElement = null;
@@ -685,16 +1042,6 @@
                         saveData().then(renderDivisions);
                     });
                 });
-            }
-
-            function getLayoutParams() {
-                const segments = (divisionsData.length || 0) + 1;
-                const scaleWidth = scaleBar.offsetWidth;
-                const segmentWidth = scaleWidth / segments;
-                const divisionNominalWidth = 120;
-                const isOverlapping = segmentWidth < divisionNominalWidth && divisionsData.length > 1;
-                const maxLevels = isOverlapping ? Math.ceil(divisionNominalWidth / segmentWidth) : 1;
-                return { isOverlapping, maxLevels };
             }
 
             scaleBar.addEventListener('dragover', (e) => {
@@ -716,6 +1063,7 @@
                 }
 
                 const layoutParams = getLayoutParams();
+                
                 divisionsData.forEach((item, index) => {
                     const el = scaleBar.querySelector(`.division-container[data-id="${item.id}"]`);
                     if (el) {
@@ -724,9 +1072,10 @@
                             el.style.left = `${newPosition}%`;
                         }
                         
-                        const { stemHeight } = getDivisionStyles(index, layoutParams);
+                        const { stemHeight, positionClass } = getDivisionStyles(index, layoutParams);
                         
                         el.className = 'division-container'; 
+                        el.classList.add(positionClass);
                         if (item.id === draggedId) {
                             el.classList.add('dragging');
                         }
@@ -745,50 +1094,46 @@
                     id: Date.now(),
                     text: "Новый",
                     image: null,
-                    order: divisionsData.length // *** ИСПРАВЛЕНИЕ 3: Добавляем 'order' ***
+                    order: divisionsData.length
                 };
                 divisionsData.push(newItem);
                 await saveData();
                 renderDivisions();
             });
 
-            // removeButton.addEventListener('click', ...); // Удалено
-
             async function main() {
+                applyTheme(localStorage.getItem('theme') || 'light');
+                
+                const savedTitle = localStorage.getItem('scaleTitle') || '';
+                scaleTitle.innerText = savedTitle;
+                adjustTitleFontSize();
+                
+                const savedMode = localStorage.getItem('viewMode') || 'bottom';
+                applyViewMode(savedMode);
+
                 try {
                     await initDB();
                     const data = await loadData();
                     if (data.length > 0) {
                         divisionsData = data;
                     } else {
-                        // *** ИСПРАВЛЕНИЕ 3: Добавляем 'order' в данные по умолчанию ***
-                        divisionsData = [
-                            { id: 1, text: "Плохо", image: null, order: 0 },
-                            { id: 2, text: "Не очень", image: null, order: 1 },
-                            { id: 3, text: "Mid", image: null, order: 2 },
-                            { id: 4, text: "Отлично", image: null, order: 3 }
-                        ];
+                        divisionsData = getDefaultData();
                         await saveData();
                     }
                 } catch (err) {
                     console.error("Не удалось загрузить данные:", err);
-                     divisionsData = [
-                        { id: 1, text: "Плохо", image: null, order: 0 },
-                        { id: 2, text: "Не очень", image: null, order: 1 },
-                        { id: 3, text: "Mid", image: null, order: 2 },
-                        { id: 4, "text": "Отлично", image: null, order: 3 }
-                    ];
+                     divisionsData = getDefaultData();
                 }
                 renderDivisions();
             }
 
             main();
-            // *** ИСПРАВЛЕНИЕ 2: Оборачиваем ресайз в setTimeout ***
+            
             window.addEventListener('resize', () => {
+                adjustTitleFontSize();
                 setTimeout(renderDivisions, 0);
             });
         });
     </script>
 </body>
-
 </html>

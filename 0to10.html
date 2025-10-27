@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
-    <title>шкала</title>
+    <title>0 to 10</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
         :root {
@@ -148,6 +148,7 @@
             margin: 15px auto 0 auto;
         }
 
+
         .main-wrapper {
             flex-grow: 1;
             display: flex;
@@ -200,6 +201,8 @@
             width: 100%;
             position: relative;
             transition: width 0.1s linear, padding 0.4s ease;
+            padding-top: 80vh;
+            padding-bottom: 0;
         }
         
         .content-area.view-mode-center .scale-panning-container {
@@ -385,42 +388,16 @@
         }
         
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--modal-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--modal-bg); display: flex; align-items: center; justify-content: center; z-index: 2000;
         }
-        
         .modal-content {
-            background-color: var(--modal-content-bg);
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 600px;
-            width: 90%;
-            position: relative;
-            line-height: 1.6;
+            background-color: var(--modal-content-bg); padding: 30px; border-radius: 10px; max-width: 600px; width: 90%; position: relative; line-height: 1.6;
         }
-        
         .modal-close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-            color: var(--text-color);
+            position: absolute; top: 15px; right: 15px; font-size: 24px; font-weight: bold; cursor: pointer; color: var(--text-color);
         }
-        
         .modal-content h2 {
-            margin-top: 0;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
+            margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;
         }
         
     </style>
@@ -440,12 +417,12 @@
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v2h-2V7zm0 4h2v6h-2v-6z"/>
                 </svg>
 			</button>
-            <button id="undo-btn" class="sidebar-item" title="Отменить (пока что фичи нет)" disabled>
+            <button id="undo-btn" class="sidebar-item" title="Отменить" disabled>
                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C20.08 11.03 16.63 8 12.5 8z"/>
                  </svg>
             </button>
-            <button id="redo-btn" class="sidebar-item" title="Вернуть (пока что фичи нет)" disabled>
+            <button id="redo-btn" class="sidebar-item" title="Вернуть" disabled>
                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                      <path d="m 11.97,8c 2.65,0 5.05,0.99 6.9,2.6L 22.47,7v 9h -9l 3.62,-3.62C 15.7,11.22 13.93,10.5 11.97,10.5 8.43,10.5 5.42,12.81 4.37,16L 2,15.22C 4.39,11.03 7.84,8 11.97,8 Z"/>
                  </svg>
@@ -521,11 +498,12 @@
                 <li><b>Добавить:</b> Кнопка "+" на левой панели добавляет новый элемент.</li>
                 <li><b>Удалить:</b> Наведите курсор на элемент, появится красный крестик. Нажмите, чтобы удалить элемент.</li>
                 <li><b>Перемещение:</b> Нажмите и удерживайте текстовое поле, чтобы перетащить его на новую позицию.</li>
+                <li><b>Картинки:</b> Наведите курсор на текстовое поле, и над ним появится синяя кнопка "+". Скопируйте картинку и нажмите на "+", чтобы вставить ее. Чтобы её убрать, нажмите на серую кнопку с минусом.</li>
+                <li><b>Отменить/Вернуть:</b> Кнопки со стрелками отменяют или возвращают последнее действие (кроме масштаба/вида).</li>
                 <li><b>Вид:</b> Кнопки по центру левой панели меняют компоновку шкалы.</li>
                 <li><b>Масштаб:</b> Используйте ползунок "Приближение" на левой панели, чтобы растянуть шкалу.</li>
                 <li><b>Скриншот:</b> Кнопка "Камера" делает снимок всей вашей шкалы включая заголовок (снимется вся шкала, даже если она растянута за пределы монитора) и скачивает его.</li>
-                <li><b>Картинки:</b> Наведите курсор на текстовое поле, и над ним появится синяя кнопка "+". Скопируйте картинку и нажмите на "+", чтобы вставить ее. Чтобы её убрать, нажмите на серую кнопку с минусом.</li>
-                <li><b>Сохранение:</b> Все изменения (порядок, текст, изображения, вид, заголовок) сохраняются автоматически.</li>
+				<li><b>Сохранение:</b> Все изменения (порядок, текст, изображения, вид, заголовок) сохраняются автоматически.</li>
             </ul>
         </div>
     </div>
@@ -551,6 +529,7 @@
 			const zoomResetBtn = document.getElementById('zoom-reset-btn'); 
 			const undoBtn = document.getElementById('undo-btn');
             const redoBtn = document.getElementById('redo-btn');
+
             let divisionsData = [];
             let draggedElement = null;
             let draggedId = null;
@@ -560,6 +539,10 @@
             const MIN_TITLE_FONT_SIZE = 0.8;
             const DB_NAME = 'ScaleDB';
             const STORE_NAME = 'divisions';
+
+            let historyStack = [];
+            let historyIndex = -1;
+            let isRestoringState = false; 
 
             async function initDB() {
                 return new Promise((resolve, reject) => {
@@ -593,7 +576,7 @@
             }
 
             async function saveData() {
-                if (!db) return;
+                if (!db || isRestoringState) return;
                 return new Promise((resolve, reject) => {
                     const transaction = db.transaction([STORE_NAME], 'readwrite');
                     const store = transaction.objectStore(STORE_NAME);
@@ -630,13 +613,74 @@
             async function resetDataToDefault() {
                 if (confirm("Вы уверены, что хотите сбросить всю шкалу? Это действие необратимо.")) {
                     divisionsData = getDefaultData();
-                    await saveData();
+                    captureState();
+                    await saveData(); 
                     scaleTitle.innerText = '';
                     localStorage.removeItem('scaleTitle');
                     adjustTitleFontSize();
                     renderDivisions();
                 }
             }
+
+            // === ФУНКЦИИ ИСТОРИИ ===
+            function updateUndoRedoButtons() {
+                undoBtn.disabled = historyIndex <= 0;
+                redoBtn.disabled = historyIndex >= historyStack.length - 1;
+            }
+
+            function captureState() {
+                if (isRestoringState) return; 
+                
+                try {
+                    const newState = divisionsData.map(item => ({...item}));
+                    historyStack = historyStack.slice(0, historyIndex + 1); 
+                    historyStack.push(newState);
+                    historyIndex++;
+                    updateUndoRedoButtons();
+                } catch (e) {
+                    console.error("Ошибка клонирования состояния для истории:", e);
+                }
+            }
+
+            function undo() {
+                if (historyIndex <= 0) return;
+                
+                isRestoringState = true; 
+                historyIndex--;
+                 try {
+                   divisionsData = historyStack[historyIndex].map(item => ({...item}));
+                   renderDivisions();
+                   saveData(); 
+                } catch (e) {
+                   console.error("Ошибка восстановления состояния:", e);
+                   historyIndex++; 
+                } finally {
+                   isRestoringState = false; 
+                   updateUndoRedoButtons();
+                }
+            }
+            
+            function redo() {
+                if (historyIndex >= historyStack.length - 1) return;
+
+                isRestoringState = true; 
+                historyIndex++;
+                 try {
+                    divisionsData = historyStack[historyIndex].map(item => ({...item}));
+                   renderDivisions();
+                   saveData(); 
+                } catch (e) {
+                   console.error("Ошибка восстановления состояния:", e);
+                   historyIndex--; 
+                } finally {
+                    isRestoringState = false; 
+                    updateUndoRedoButtons();
+                }
+            }
+
+            undoBtn.addEventListener('click', undo);
+            redoBtn.addEventListener('click', redo);
+
 
             const applyTheme = (theme) => document.body.classList.toggle('dark-mode', theme === 'dark');
             themeToggleButton.addEventListener('click', () => {
@@ -670,12 +714,15 @@
                 adjustTitleFontSize();
                 localStorage.setItem('scaleTitle', scaleTitle.innerText);
             });
+            scaleTitle.addEventListener('change', () => {
+                captureState();
+            });
             
 
             zoomSlider.addEventListener('input', (e) => {
                 const zoomLevel = e.target.value;
                 scalePanningContainer.style.width = `${zoomLevel * 100}%`;
-                setTimeout(renderDivisions, 0); 
+                renderDivisions();
             });
 
             zoomResetBtn.addEventListener('click', () => {
@@ -683,6 +730,7 @@
                 scalePanningContainer.style.width = `100%`;
                 setTimeout(renderDivisions, 0);
             });
+
 
             function applyViewMode(mode) {
                 currentViewMode = mode;
@@ -710,14 +758,14 @@
             }
 
             async function takeScreenshot() {
-                const titleEl = document.getElementById('scale-title');
+                 const titleEl = document.getElementById('scale-title');
                 const scaleContainerEl = document.getElementById('scalePanningContainer');
                 const titleValue = titleEl.innerText.trim();
                 
                 const captureDiv = document.createElement('div');
                 captureDiv.style.position = 'absolute';
                 captureDiv.style.left = '-9999px';
-                captureDiv.style.width = Math.max(scaleContainerEl.scrollWidth, titleEl.scrollWidth) + 40 + 'px'; 
+                captureDiv.style.width = Math.max(scaleContainerEl.scrollWidth, titleEl.scrollWidth) + 40 + 'px';
                 captureDiv.style.padding = '20px';
                 captureDiv.style.display = 'flex';
                 captureDiv.style.flexDirection = 'column';
@@ -731,59 +779,25 @@
                     titleClone.style.fontSize = scaleTitle.style.fontSize;
                     titleClone.style.width = '100%';
                     titleClone.style.color = getComputedStyle(titleEl).color;
-                    titleClone.style.marginBottom = '0px';
-                    titleClone.style.padding = '20px 0 10px 0';
+                    titleClone.style.marginBottom = '0px'; 
                     captureDiv.appendChild(titleClone);
                     
+                    const titleSpacer = document.createElement('div');
+                    titleSpacer.style.height = '10px'; 
+                    captureDiv.appendChild(titleSpacer);
                 }
                 
                 const scaleClone = scaleContainerEl.cloneNode(true);
-                scaleClone.style.width = '100%';
-                if (currentViewMode === 'center') {
-                    scaleClone.style.paddingTop = '0px'; 
-                } 
+                scaleClone.style.paddingTop = getComputedStyle(scaleContainerEl).paddingTop;
                 scaleClone.style.paddingBottom = getComputedStyle(scaleContainerEl).paddingBottom || '0px'; 
-
+                scaleClone.style.width = '100%';
+                
                 const allInputs = scaleClone.querySelectorAll('input[type="text"]');
                 allInputs.forEach(input => {
-                    const style = getComputedStyle(input);
-                    const text = input.value;
-                    const parent = input.parentNode;
-                    
-                    const div = document.createElement('div');
-                    div.innerText = text;
-                    div.className = 'screenshot-text-div-replacement'; 
-                    div.style.width = style.width;
-                    div.style.height = style.height;
-                    div.style.padding = style.padding;
-                    div.style.margin = style.margin;
-                    div.style.boxSizing = style.boxSizing;
-                    div.style.order = style.order; 
-                    
-                    const computedBodyStyle = getComputedStyle(document.body);
-                    const inputBgColor = computedBodyStyle.getPropertyValue('--input-bg-color').trim() || '#2a2a2a'; 
-                    const inputBorderColor = computedBodyStyle.getPropertyValue('--input-border-color').trim() || '#555';
-                    const textColor = computedBodyStyle.getPropertyValue('--text-color').trim() || '#e0e0e0';
-
-                    div.style.backgroundColor = inputBgColor; 
-                    div.style.border = `1px solid ${inputBorderColor}`;
-                    div.style.borderRadius = style.borderRadius; 
-
-                    div.style.color = textColor; 
-                    div.style.fontSize = style.fontSize;
-                    div.style.textAlign = style.textAlign; 
-                    
-                    div.style.display = 'flex'; 
-                    div.style.alignItems = 'center'; 
-                    div.style.justifyContent = 'center'; 
-                    
-                    div.style.pointerEvents = 'none'; 
-                    div.style.cursor = 'default';
-                    
-                    parent.insertBefore(div, input);
-                    parent.removeChild(input);
+                    input.style.color = 'transparent';
+                    input.style.caretColor = 'transparent'; 
+                    input.placeholder = ''; 
                 });
-
 
                 const allImgTags = scaleClone.querySelectorAll('.image-container img');
                 const conversionPromises = [];
@@ -809,7 +823,8 @@
                 document.body.appendChild(captureDiv);
 
                 try {
-                    await new Promise(resolve => setTimeout(resolve, 100));
+                    await new Promise(resolve => setTimeout(resolve, 100)); 
+                    
                     const canvas = await html2canvas(captureDiv, {
                         useCORS: true,
                         width: captureDiv.scrollWidth, 
@@ -843,7 +858,7 @@
                 if (currentViewMode === 'center') {
                     const isUp = (index + 1) % 2 !== 0;
                     positionClass = isUp ? 'position-up' : 'position-down';
-                    const typeIndex = isUp ? Math.floor(index / 2) : Math.floor(index / 2);
+                    const typeIndex = Math.floor(index / 2); 
                     level = typeIndex % maxLevels;
                 } else { 
                     positionClass = 'position-up';
@@ -853,23 +868,24 @@
                 const baseStemHeight = 40;
                 const rowHeight = 60;
                 const stemHeight = baseStemHeight + (level * rowHeight);
-                return { stemHeight, positionClass, level }
+                return { stemHeight, positionClass, level };
             }
 
             function getLayoutParams() {
                 const segments = (divisionsData.length || 0) + 1;
-                const scaleWidth = scaleBar.offsetWidth;
+                const scaleWidth = scaleBar.offsetWidth; 
                 const segmentWidth = scaleWidth / segments;
                 const divisionNominalWidth = 120;
                 const isOverlapping = segmentWidth < divisionNominalWidth && divisionsData.length > 1;
-                const maxLevels = isOverlapping ? Math.ceil(divisionNominalWidth / segmentWidth) : 1;
+                const maxLevels = isOverlapping ? Math.max(1, Math.ceil(divisionNominalWidth / segmentWidth)) : 1;
                 return { isOverlapping, maxLevels };
             }
+
 
             function renderDivisions() {
                 scaleBar.innerHTML = '';
                 
-                const layoutParams = getLayoutParams();
+                const layoutParams = getLayoutParams(); 
                 let maxLevelUp = -1;
                 let maxLevelDown = -1;
                 const textElementHeight = 40; 
@@ -886,17 +902,21 @@
                         container.classList.add('has-image');
                     }
 
-                    const { stemHeight, positionClass, level } = getDivisionStyles(index, layoutParams);
+                    const { stemHeight, positionClass, level } = getDivisionStyles(index, layoutParams); 
                     container.classList.add(positionClass);
                     
                     const isImagePresent = !!item.image;
                     const elementContentHeight = isImagePresent ? imageElementHeight : textElementHeight;
                     
                     if (positionClass === 'position-up') {
-                        dynamicLevelsUp[level] = Math.max(dynamicLevelsUp[level], elementContentHeight);
+                        if (level < dynamicLevelsUp.length) {
+                           dynamicLevelsUp[level] = Math.max(dynamicLevelsUp[level], elementContentHeight);
+                        }
                         maxLevelUp = Math.max(maxLevelUp, level);
                     } else if (positionClass === 'position-down') {
-                        dynamicLevelsDown[level] = Math.max(dynamicLevelsDown[level], elementContentHeight);
+                         if (level < dynamicLevelsDown.length) {
+                           dynamicLevelsDown[level] = Math.max(dynamicLevelsDown[level], elementContentHeight);
+                         }
                         maxLevelDown = Math.max(maxLevelDown, level);
                     }
 
@@ -905,8 +925,12 @@
                     imageContainer.className = 'image-container';
                     if (item.image) {
                         const img = document.createElement('img');
-                        img.src = URL.createObjectURL(item.image); 
-                        img.onload = () => URL.revokeObjectURL(img.src);
+                        if (item.image instanceof Blob) {
+                           img.src = URL.createObjectURL(item.image); 
+                           img.onload = () => URL.revokeObjectURL(img.src);
+                        } else {
+                            console.warn("Попытка создать URL не из Blob для ID:", item.id);
+                        }
                         imageContainer.appendChild(img);
                     }
                     container.appendChild(imageContainer);
@@ -915,8 +939,9 @@
                     input.type = 'text';
                     input.value = item.text;
                     input.draggable = true;
-                    input.addEventListener('change', () => {
+                    input.addEventListener('change', () => { 
                         item.text = input.value;
+                        captureState(); 
                         saveData();
                     });
                     container.appendChild(input);
@@ -927,25 +952,19 @@
                     addImgBtn.id = 'add-image-btn';
                     addImgBtn.innerHTML = '+';
                     addImgBtn.title = 'Вставить картинку из буфера обмена';
-                    addImgBtn.addEventListener('click', () => handleImagePaste(item.id));
+                    addImgBtn.dataset.itemId = item.id; 
                     btnControls.appendChild(addImgBtn);
+                    
                     const removeImgFromDivBtn = document.createElement('button');
                     removeImgFromDivBtn.id = 'remove-image-from-div-btn';
-                    removeImgFromDivBtn.innerHTML = '&#8722;';
+                    removeImgFromDivBtn.innerHTML = '&#8722;'; // Minus sign
                     removeImgFromDivBtn.title = 'Удалить картинку';
-                    removeImgFromDivBtn.addEventListener('click', () => {
-                        item.image = null;
-                        saveData().then(renderDivisions);
-                    });
                     btnControls.appendChild(removeImgFromDivBtn);
                     
                     const removeDivBtn = document.createElement('button');
                     removeDivBtn.id = 'remove-division-btn';
                     removeDivBtn.innerHTML = '&times;';
                     removeDivBtn.title = 'Удалить элемент';
-                    removeDivBtn.addEventListener('click', () => {
-                        handleRemoveDivision(item.id);
-                    });
                     btnControls.appendChild(removeDivBtn);
                     
                     container.appendChild(btnControls); 
@@ -969,11 +988,11 @@
                 let totalHeightUp = 0;
                 let totalHeightDown = 0;
 
-                if (maxLevelUp > -1) {
+                if (maxLevelUp > -1 && maxLevelUp < dynamicLevelsUp.length) {
                     totalHeightUp = baseStemHeight + (maxLevelUp * rowHeight) + dynamicLevelsUp[maxLevelUp];
                 }
                 
-                if (currentViewMode === 'center' && maxLevelDown > -1) {
+                if (currentViewMode === 'center' && maxLevelDown > -1 && maxLevelDown < dynamicLevelsDown.length) {
                     totalHeightDown = baseStemHeight + (maxLevelDown * rowHeight) + dynamicLevelsDown[maxLevelDown];
                 }
 
@@ -989,6 +1008,7 @@
                 scalePanningContainer.style.paddingBottom = `${paddingBottomPx}px`;
 
                 addDragAndDropHandlers();
+                updateUndoRedoButtons(); 
             }
             
             async function handleImagePaste(id) {
@@ -1011,6 +1031,7 @@
                     const item = divisionsData.find(d => d.id === id);
                     if (item) {
                         item.image = blob;
+                        captureState(); 
                         await saveData();
                         renderDivisions();
                     }
@@ -1022,6 +1043,7 @@
             
             async function handleRemoveDivision(id) {
                 divisionsData = divisionsData.filter(item => item.id !== id);
+                captureState(); 
                 await saveData();
                 renderDivisions();
             }
@@ -1038,11 +1060,45 @@
                         if (!draggedElement) return;
                         draggedElement.classList.remove('dragging');
                         draggedElement = null;
-                        draggedId = null;
+                        draggedId = null
+                        captureState(); 
                         saveData().then(renderDivisions);
                     });
                 });
             }
+
+            scaleBar.addEventListener('click', (event) => {
+                const target = event.target;
+                const container = target.closest('.division-container'); 
+                if (!container) return; 
+
+                const itemId = Number(container.dataset.id);
+                 if (isNaN(itemId)) return; 
+
+                const addBtn = target.closest('#add-image-btn');
+                if (addBtn) {
+                     handleImagePaste(itemId);
+                     return; 
+                }
+
+                const removeDivBtn = target.closest('#remove-division-btn');
+                if (removeDivBtn) {
+                     handleRemoveDivision(itemId);
+                     return; 
+                }
+
+                 const removeImgBtn = target.closest('#remove-image-from-div-btn');
+                 if (removeImgBtn) {
+                     const item = divisionsData.find(d => d.id === itemId);
+                     if (item) {
+                         item.image = null;
+                         captureState(); 
+                         saveData().then(renderDivisions);
+                     }
+                      return;
+                 }
+            });
+
 
             scaleBar.addEventListener('dragover', (e) => {
                 e.preventDefault();
@@ -1097,6 +1153,7 @@
                     order: divisionsData.length
                 };
                 divisionsData.push(newItem);
+                captureState(); 
                 await saveData();
                 renderDivisions();
             });
@@ -1124,11 +1181,13 @@
                     console.error("Не удалось загрузить данные:", err);
                      divisionsData = getDefaultData();
                 }
+                
+                captureState();
                 renderDivisions();
             }
 
             main();
-            
+			
             window.addEventListener('resize', () => {
                 adjustTitleFontSize();
                 setTimeout(renderDivisions, 0);

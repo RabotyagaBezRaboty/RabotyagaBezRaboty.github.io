@@ -3,403 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+	<link rel="shortcut icon" type="image/x-icon" href="images\icons\0to10.ico">
     <title>0 to 10</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="css/0to10.css">
 <style>
-        :root {
-            --bg-color: #f0f2f5;
-            --text-color: #333;
-            --border-color: #333;
-            --input-bg-color: #ffffff;
-            --input-border-color: #aaa;
-            --icon-fill-color: #333;
-            --modal-bg: rgba(0, 0, 0, 0.4);
-            --modal-content-bg: #fff;
-            --sidebar-dark-bg: #212529;
-            --sidebar-text: #f8f9fa;
-        }
-
-        body.dark-mode {
-            --bg-color: #121212;
-            --text-color: #e0e0e0;
-            --border-color: #e0e0e0;
-            --input-bg-color: #2a2a2a;
-            --input-border-color: #555;
-            --icon-fill-color: #e0e0e0;
-            --modal-bg: rgba(0, 0, 0, 0.7);
-            --modal-content-bg: #2a2a2a;
-            --sidebar-dark-bg: #212529;
-            --sidebar-text: #f8f9fa;
-        }
-        
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: row;
-            min-height: 100vh;
-            margin: 0;
-            overflow: hidden; 
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .sidebar {
-            width: 70px;
-            flex-shrink: 0;
-            background-color: var(--sidebar-dark-bg);
-            color: var(--sidebar-text);
-            padding: 20px 10px;
-            display: flex;
-            flex-direction: column;
-            z-index: 100;
-            overflow: hidden; 
-        }
-
-        .sidebar-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        
-        .sidebar-spacer {
-            flex-grow: 1;
-        }
-        
-        .sidebar-group:last-child {
-             margin-bottom: 0;
-        }
-
-        .sidebar-header {
-            font-size: 0.9em;
-            font-weight: 600;
-            color: #adb5bd;
-            text-transform: uppercase;
-            border-bottom: 1px solid #495057;
-            padding-bottom: 5px;
-            white-space: nowrap;
-            opacity: 0; 
-        }
-
-        .sidebar-item {
-            padding: 10px 12px;
-            font-size: 14px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s, justify-content 0.3s ease;
-            color: white;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 0;
-            background-color: #495057;
-            white-space: nowrap;
-            overflow: hidden;
-            justify-content: center;
-        }
-        
-        .sidebar-item:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            background-color: #495057;
-        }
-        
-        .sidebar-item svg {
-            width: 18px;
-            height: 18px;
-            fill: var(--sidebar-text);
-            flex-shrink: 0; 
-        }
-
-        .sidebar-item span {
-            display: none;
-        }
-
-        .sidebar-item:not(:disabled):hover {
-            background-color: #5a6268;
-        }
-        
-        .sidebar-item:active {
-            transform: scale(0.98);
-        }
-
-        #addButton { background-color: #2ecc71; }
-        #addButton:hover { background-color: #27ae60; }
-        #resetButton { background-color: #e74c3c; }
-        #resetButton:hover { background-color: #c0392b; }
-
-        #zoom-slider {
-            width: 20px;
-            height: 120px;
-            cursor: pointer;
-            opacity: 1;
-            transition: opacity 0.2s ease;
-            -webkit-appearance: slider-vertical;
-            appearance: slider-vertical;
-            
-            display: block; 
-            margin: 15px auto 0 auto;
-        }
-
-
-        .main-wrapper {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        #scale-title {
-            width: 100%;
-            border: none;
-            background: none;
-            color: var(--text-color);
-            font-size: 2.5em;
-            font-weight: bold;
-            text-align: center;
-            padding: 20px 40px 10px 40px;
-            outline: none;
-            white-space: nowrap;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-        #scale-title:empty:before {
-            content: attr(data-placeholder);
-            color: var(--input-border-color);
-            font-weight: normal;
-        }
-
-        .content-area {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 0 40px 20px 40px;
-            overflow: hidden;
-            transition: justify-content 0.4s ease;
-        }
-        
-        .content-area.view-mode-center {
-            justify-content: center;
-        }
-
-        .scroll-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            padding-bottom: 20px;
-        }
-        
-        .scale-panning-container {
-            width: 100%;
-            position: relative;
-            transition: width 0.1s linear, padding 0.4s ease;
-            padding-top: 80vh;
-            padding-bottom: 0;
-        }
-        
-        .content-area.view-mode-center .scale-panning-container {
-        }
-
-        .scale-bar {
-            width: 100%;
-            height: 20px;
-            border: 2px solid var(--border-color);
-            border-radius: 10px;
-            background: linear-gradient(to right, #e74c3c, #f1c40f, #2ecc71);
-            transition: border-color 0.3s ease, top 0.4s ease, bottom 0.4s ease, transform 0.4s ease;
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            transform: translateY(0);
-        }
-        
-        .content-area.view-mode-center .scale-bar {
-            top: 50%;
-            bottom: auto;
-            transform: translateY(-50%);
-        }
-        
-        .division-container {
-            position: absolute;
-            width: 120px;
-            display: flex;
-            align-items: center;
-            transform: translateX(-50%);
-            transition: left 0.3s ease, opacity 0.2s ease, top 0.4s ease, bottom 0.4s ease;
-            pointer-events: none; 
-        }
-        
-        .division-container.position-up {
-            bottom: 10px;
-            flex-direction: column;
-        }
-        
-        .division-container.position-down {
-            top: 10px;
-            bottom: auto;
-            flex-direction: column-reverse;
-        }
-
-        .division-container.dragging {
-            opacity: 0.5;
-            cursor: grabbing;
-            transition: none;
-            z-index: 1000;
-        }
-        
-        .division-btn-controls {
-            position: absolute; 
-            top: -15px; 
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            display: flex;
-            gap: 8px;
-            height: 24px;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-            pointer-events: none; 
-        }
-        
-        .position-down .division-btn-controls {
-            top: auto;
-            bottom: -15px;
-        }
-        
-        .division-container input[type="text"]:hover + .division-btn-controls,
-        .division-container input[type="text"]:focus + .division-btn-controls,
-        .division-btn-controls:hover { 
-            opacity: 1;
-            pointer-events: auto; 
-        }
-
-        .division-btn-controls button {
-            width: 24px;
-            height: 24px;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            pointer-events: auto; 
-        }
-        
-        #add-image-btn { 
-            background-color: #007bff;
-        }
-        
-        #add-image-btn:hover {
-            background-color: #0056b3;
-        }
-        
-        #remove-image-from-div-btn {
-            background-color: #7f8c8d;
-            display: none;
-        }
-        
-        #remove-image-from-div-btn:hover {
-            background-color: #95a5a6;
-        }
-        
-        #remove-division-btn { 
-            background-color: #e74c3c;
-        }
-        
-        #remove-division-btn:hover {
-            background-color: #c0392b;
-        }
-        
-        .division-container.has-image #add-image-btn {
-            display: none;
-        }
-        
-        .division-container.has-image #remove-image-from-div-btn {
-            display: flex;
-        }
-
-        
-        .remove-division-btn {
-            background-color: #e74c3c;
-        }
-        
-        .division-stem {
-            width: 3px;
-            background-color: var(--border-color);
-            transition: background-color 0.3s ease, height 0.3s ease;
-            pointer-events: none; 
-        }
-        
-        .division-container input[type="text"] {
-            width: 100%;
-            padding: 5px;
-            background-color: var(--input-bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--input-border-color);
-            border-radius: 5px;
-            text-align: center;
-            box-sizing: border-box;
-            font-size: 14px;
-            margin-top: 5px;
-            margin-bottom: 5px;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-            position: relative;
-            z-index: 2;
-            order: 2;
-            cursor: grab;
-            pointer-events: auto; 
-        }
-        
-        .division-container.dragging input[type="text"] {
-            cursor: grabbing;
-        }
-
-        .image-container {
-            width: 100%;
-            margin-bottom: 5px;
-            position: relative;
-            order: 0;
-            pointer-events: none; 
-        }
-		
-        .division-container:hover {
-            z-index: 100;
-            transition-delay: 0s;
-        }
-		
-        .image-container img {
-            width: 100%;
-            height: auto;
-            border-radius: 5px;
-            border: 1px solid var(--input-border-color);
-            display: block;
-        }
-        
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--modal-bg); display: flex; align-items: center; justify-content: center; z-index: 2000;
-        }
-        .modal-content {
-            background-color: var(--modal-content-bg); padding: 30px; border-radius: 10px; max-width: 600px; width: 90%; position: relative; line-height: 1.6;
-        }
-        .modal-close {
-            position: absolute; top: 15px; right: 15px; font-size: 24px; font-weight: bold; cursor: pointer; color: var(--text-color);
-        }
-        .modal-content h2 {
-            margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;
-        }
-        
     </style>
 </head>
 <body>
@@ -417,6 +25,11 @@
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v2h-2V7zm0 4h2v6h-2v-6z"/>
                 </svg>
 			</button>
+            <button id="lang-toggle-btn" class="sidebar-item" title="Переключить язык">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
+                </svg>
+            </button>
             <button id="undo-btn" class="sidebar-item" title="Отменить" disabled>
                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C20.08 11.03 16.63 8 12.5 8z"/>
@@ -494,22 +107,89 @@
             <span class="modal-close" id="modalClose">&times;</span>
             <h2>Как пользоваться сайтом</h2>
             <ul>
-                <li><b>Заголовок:</b> Кликните на текст "Введите заголовок...", чтобы его изменить.</li>
-                <li><b>Добавить:</b> Кнопка "+" на левой панели добавляет новый элемент.</li>
-                <li><b>Удалить:</b> Наведите курсор на элемент, появится красный крестик. Нажмите, чтобы удалить элемент.</li>
-                <li><b>Перемещение:</b> Нажмите и удерживайте текстовое поле, чтобы перетащить его на новую позицию.</li>
-                <li><b>Картинки:</b> Наведите курсор на текстовое поле, и над ним появится синяя кнопка "+". Скопируйте картинку и нажмите на "+", чтобы вставить ее. Чтобы её убрать, нажмите на серую кнопку с минусом.</li>
-                <li><b>Отменить/Вернуть:</b> Кнопки со стрелками отменяют или возвращают последнее действие (кроме масштаба/вида).</li>
-                <li><b>Вид:</b> Кнопки по центру левой панели меняют компоновку шкалы.</li>
-                <li><b>Масштаб:</b> Используйте ползунок "Приближение" на левой панели, чтобы растянуть шкалу.</li>
-                <li><b>Скриншот:</b> Кнопка "Камера" делает снимок всей вашей шкалы включая заголовок (снимется вся шкала, даже если она растянута за пределы монитора) и скачивает его.</li>
-				<li><b>Сохранение:</b> Все изменения (порядок, текст, изображения, вид, заголовок) сохраняются автоматически.</li>
             </ul>
         </div>
     </div>
 
 
     <script>
+        const translations = {
+            ru: {
+                title: "0 to 10",
+                theme: "Переключить тему",
+                help: "Помощь",
+                lang: "Переключить язык (Switch Language)",
+                undo: "Отменить",
+                redo: "Вернуть",
+                viewBottom: "Вид: Снизу",
+                viewCenter: "Вид: По центру",
+                add: "Добавить",
+                reset: "Сбросить",
+                zoomReset: "Сбросить приближение",
+                screenshot: "Скриншот",
+                titlePlaceholder: "Введите заголовок...",
+                modalTitle: "Как пользоваться сайтом",
+                modalItems: [
+                    "<b>Заголовок:</b> Кликните на текст \"Введите заголовок...\", чтобы его изменить.",
+                    "<b>Добавить:</b> Кнопка \"+\" на левой панели добавляет новый элемент.",
+                    "<b>Удалить:</b> Наведите курсор на элемент, появится красный крестик. Нажмите, чтобы удалить элемент.",
+                    "<b>Перемещение:</b> Нажмите и удерживайте текстовое поле, чтобы перетащить его на новую позицию.",
+                    "<b>Картинки:</b> Наведите курсор на текстовое поле, и над ним появится синяя кнопка \"+\". Скопируйте картинку и нажмите на \"+\", чтобы вставить ее. Чтобы её убрать, нажмите на серую кнопку с минусом.",
+                    "<b>Отменить/Вернуть:</b> Кнопки со стрелками отменяют или возвращают последнее действие (кроме масштаба/вида).",
+                    "<b>Вид:</b> Кнопки по центру левой панели меняют компоновку шкалы.",
+                    "<b>Масштаб:</b> Используйте ползунок на левой панели, чтобы растянуть шкалу.",
+                    "<b>Скриншот:</b> Кнопка \"Камера\" делает снимок всей вашей шкалы включая заголовок и скачивает его.",
+                    "<b>Сохранение:</b> Все изменения (порядок, текст, изображения, вид, заголовок) сохраняются автоматически."
+                ],
+                resetConfirm: "Вы уверены, что хотите сбросить всю шкалу? Это действие необратимо.",
+                clipboardDenied: "Доступ к буферу обмена запрещен.",
+                imgNotFound: "Картинка не найдена в буфере обмена.",
+                pasteError: "Не удалось вставить картинку. ",
+                screenshotError: "Не удалось сделать скриншот.",
+                defaultText: "Введите текст",
+                pasteImgTitle: "Вставить картинку из буфера обмена",
+                removeImgTitle: "Удалить картинку",
+                removeDivTitle: "Удалить элемент"
+            },
+            en: {
+                title: "0 to 10",
+                theme: "Toggle Theme",
+                help: "Help",
+                lang: "Переключить язык (Switch Language)",
+                undo: "Undo",
+                redo: "Redo",
+                viewBottom: "View: Bottom",
+                viewCenter: "View: Center",
+                add: "Add",
+                reset: "Reset",
+                zoomReset: "Reset Zoom",
+                screenshot: "Screenshot",
+                titlePlaceholder: "Enter a title...",
+                modalTitle: "How to use this site",
+                modalItems: [
+                    "<b>Title:</b> Click the text \"Enter a title...\" to change it.",
+                    "<b>Add:</b> The \"+\" button on the left panel adds a new item.",
+                    "<b>Delete:</b> Hover over an item, a red cross will appear. Click to delete the item.",
+                    "<b>Move:</b> Click and hold the text field to drag it to a new position.",
+                    "<b>Images:</b> Hover over a text field, and a blue \"+\" button will appear above it. Copy an image and click \"+\" to paste it. To remove it, click the gray minus button.",
+                    "<b>Undo/Redo:</b> The arrow buttons undo or redo the last action (except zoom/view).",
+                    "<b>View:</b> The buttons in the center of the left panel change the scale layout.",
+                    "<b>Zoom:</b> Use the slider on the left panel to stretch the scale.",
+                    "<b>Screenshot:</b> The \"Camera\" button takes a picture of your entire scale including the title and downloads it.",
+                    "<b>Saving:</b> All changes (order, text, images, view, title) are saved automatically."
+                ],
+                resetConfirm: "Are you sure you want to reset the entire scale? This action cannot be undone.",
+                clipboardDenied: "Clipboard access denied.",
+                imgNotFound: "No image found in clipboard.",
+                pasteError: "Failed to paste image. ",
+                screenshotError: "Failed to take screenshot.",
+                defaultText: "Enter text",
+                pasteImgTitle: "Paste image from clipboard",
+                removeImgTitle: "Remove image",
+                removeDivTitle: "Remove item"
+            }
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             
             const contentArea = document.getElementById('contentArea');
@@ -529,6 +209,7 @@
 			const zoomResetBtn = document.getElementById('zoom-reset-btn'); 
 			const undoBtn = document.getElementById('undo-btn');
             const redoBtn = document.getElementById('redo-btn');
+            const langToggleButton = document.getElementById('lang-toggle-btn');
 
             let divisionsData = [];
             let draggedElement = null;
@@ -543,6 +224,57 @@
             let historyStack = [];
             let historyIndex = -1;
             let isRestoringState = false; 
+            let currentLang;
+
+            function getInitialLang() {
+                const savedLang = localStorage.getItem('appLang');
+                if (savedLang && translations[savedLang]) {
+                    return savedLang;
+                }
+                const browserLang = navigator.language.split('-')[0];
+                return (browserLang === 'ru') ? 'ru' : 'en';
+            }
+
+            function updateUI(lang) {
+                if (!translations[lang]) lang = 'en';
+                currentLang = lang;
+                const t = translations[lang];
+
+                document.documentElement.lang = lang;
+                document.title = t.title;
+
+                themeToggleButton.title = t.theme;
+                helpBtn.title = t.help;
+                undoBtn.title = t.undo;
+                redoBtn.title = t.redo;
+                viewModeBottomBtn.title = t.viewBottom;
+                viewModeCenterBtn.title = t.viewCenter;
+                addButton.title = t.add;
+                resetButton.title = t.reset;
+                zoomResetBtn.title = t.zoomReset;
+                screenshotButton.title = t.screenshot;
+                langToggleButton.title = t.lang;
+
+                scaleTitle.dataset.placeholder = t.titlePlaceholder;
+
+                const modal = document.getElementById('help-modal');
+                modal.querySelector('h2').innerText = t.modalTitle;
+                const modalList = modal.querySelector('ul');
+                modalList.innerHTML = '';
+                t.modalItems.forEach(itemText => {
+                    const li = document.createElement('li');
+                    li.innerHTML = itemText;
+                    modalList.appendChild(li);
+                });
+
+                renderDivisions(); 
+            }
+
+            langToggleButton.addEventListener('click', () => {
+                const newLang = (currentLang === 'ru') ? 'en' : 'ru';
+                localStorage.setItem('appLang', newLang);
+                updateUI(newLang);
+            });
 
             async function initDB() {
                 return new Promise((resolve, reject) => {
@@ -603,15 +335,15 @@
             
             function getDefaultData() {
                  return [
-                    { id: 1, text: "Плохо", image: null, order: 0 },
-                    { id: 2, text: "Не очень", image: null, order: 1 },
-                    { id: 3, text: "Mid", image: null, order: 2 },
-                    { id: 4, text: "Отлично", image: null, order: 3 }
+                    { id: 1, text: translations[currentLang].defaultText, image: null, order: 0 },
+                    { id: 2, text: translations[currentLang].defaultText, image: null, order: 1 },
+                    { id: 3, text: translations[currentLang].defaultText, image: null, order: 2 },
+                    { id: 4, text: translations[currentLang].defaultText, image: null, order: 3 }
                 ];
             }
             
             async function resetDataToDefault() {
-                if (confirm("Вы уверены, что хотите сбросить всю шкалу? Это действие необратимо.")) {
+                if (confirm(translations[currentLang].resetConfirm)) {
                     divisionsData = getDefaultData();
                     captureState();
                     await saveData(); 
@@ -622,7 +354,6 @@
                 }
             }
 
-            // === ФУНКЦИИ ИСТОРИИ ===
             function updateUndoRedoButtons() {
                 undoBtn.disabled = historyIndex <= 0;
                 redoBtn.disabled = historyIndex >= historyStack.length - 1;
@@ -758,14 +489,14 @@
             }
 
             async function takeScreenshot() {
-                 const titleEl = document.getElementById('scale-title');
+                const titleEl = document.getElementById('scale-title');
                 const scaleContainerEl = document.getElementById('scalePanningContainer');
                 const titleValue = titleEl.innerText.trim();
                 
                 const captureDiv = document.createElement('div');
                 captureDiv.style.position = 'absolute';
                 captureDiv.style.left = '-9999px';
-                captureDiv.style.width = Math.max(scaleContainerEl.scrollWidth, titleEl.scrollWidth) + 40 + 'px';
+                captureDiv.style.width = Math.max(scaleContainerEl.scrollWidth, titleEl.scrollWidth) + 40 + 'px'; 
                 captureDiv.style.padding = '20px';
                 captureDiv.style.display = 'flex';
                 captureDiv.style.flexDirection = 'column';
@@ -779,25 +510,59 @@
                     titleClone.style.fontSize = scaleTitle.style.fontSize;
                     titleClone.style.width = '100%';
                     titleClone.style.color = getComputedStyle(titleEl).color;
-                    titleClone.style.marginBottom = '0px'; 
+                    titleClone.style.marginBottom = '0px';
+                    titleClone.style.padding = '20px 0 10px 0';
                     captureDiv.appendChild(titleClone);
                     
-                    const titleSpacer = document.createElement('div');
-                    titleSpacer.style.height = '10px'; 
-                    captureDiv.appendChild(titleSpacer);
                 }
                 
                 const scaleClone = scaleContainerEl.cloneNode(true);
-                scaleClone.style.paddingTop = getComputedStyle(scaleContainerEl).paddingTop;
-                scaleClone.style.paddingBottom = getComputedStyle(scaleContainerEl).paddingBottom || '0px'; 
                 scaleClone.style.width = '100%';
-                
+                if (currentViewMode === 'center') {
+                    scaleClone.style.paddingTop = '0px'; 
+                } 
+                scaleClone.style.paddingBottom = getComputedStyle(scaleContainerEl).paddingBottom || '0px'; 
+
                 const allInputs = scaleClone.querySelectorAll('input[type="text"]');
                 allInputs.forEach(input => {
-                    input.style.color = 'transparent';
-                    input.style.caretColor = 'transparent'; 
-                    input.placeholder = ''; 
+                    const style = getComputedStyle(input);
+                    const text = input.value;
+                    const parent = input.parentNode;
+                    
+                    const div = document.createElement('div');
+                    div.innerText = text;
+                    div.className = 'screenshot-text-div-replacement'; 
+                    div.style.width = style.width;
+                    div.style.height = style.height;
+                    div.style.padding = style.padding;
+                    div.style.margin = style.margin;
+                    div.style.boxSizing = style.boxSizing;
+                    div.style.order = style.order; 
+                    
+                    const computedBodyStyle = getComputedStyle(document.body);
+                    const inputBgColor = computedBodyStyle.getPropertyValue('--input-bg-color').trim() || '#2a2a2a'; 
+                    const inputBorderColor = computedBodyStyle.getPropertyValue('--input-border-color').trim() || '#555';
+                    const textColor = computedBodyStyle.getPropertyValue('--text-color').trim() || '#e0e0e0';
+
+                    div.style.backgroundColor = inputBgColor; 
+                    div.style.border = `1px solid ${inputBorderColor}`;
+                    div.style.borderRadius = style.borderRadius; 
+
+                    div.style.color = textColor; 
+                    div.style.fontSize = style.fontSize;
+                    div.style.textAlign = style.textAlign; 
+                    
+                    div.style.display = 'flex'; 
+                    div.style.alignItems = 'center'; 
+                    div.style.justifyContent = 'center'; 
+                    
+                    div.style.pointerEvents = 'none'; 
+                    div.style.cursor = 'default';
+                    
+                    parent.insertBefore(div, input);
+                    parent.removeChild(input);
                 });
+
 
                 const allImgTags = scaleClone.querySelectorAll('.image-container img');
                 const conversionPromises = [];
@@ -823,8 +588,7 @@
                 document.body.appendChild(captureDiv);
 
                 try {
-                    await new Promise(resolve => setTimeout(resolve, 100)); 
-                    
+                    await new Promise(resolve => setTimeout(resolve, 100));
                     const canvas = await html2canvas(captureDiv, {
                         useCORS: true,
                         width: captureDiv.scrollWidth, 
@@ -841,7 +605,7 @@
                     
                 } catch (err) {
                     console.error('Ошибка скриншота:', err);
-                    alert('Не удалось сделать скриншот.');
+                    alert(translations[currentLang].screenshotError);
                 } finally {
                     document.body.removeChild(captureDiv);
                 }
@@ -951,20 +715,20 @@
                     const addImgBtn = document.createElement('button');
                     addImgBtn.id = 'add-image-btn';
                     addImgBtn.innerHTML = '+';
-                    addImgBtn.title = 'Вставить картинку из буфера обмена';
+                    addImgBtn.title = translations[currentLang].pasteImgTitle;
                     addImgBtn.dataset.itemId = item.id; 
                     btnControls.appendChild(addImgBtn);
                     
                     const removeImgFromDivBtn = document.createElement('button');
                     removeImgFromDivBtn.id = 'remove-image-from-div-btn';
-                    removeImgFromDivBtn.innerHTML = '&#8722;'; // Minus sign
-                    removeImgFromDivBtn.title = 'Удалить картинку';
+                    removeImgFromDivBtn.innerHTML = '&#8722;';
+                    removeImgFromDivBtn.title = translations[currentLang].removeImgTitle;
                     btnControls.appendChild(removeImgFromDivBtn);
                     
                     const removeDivBtn = document.createElement('button');
                     removeDivBtn.id = 'remove-division-btn';
                     removeDivBtn.innerHTML = '&times;';
-                    removeDivBtn.title = 'Удалить элемент';
+                    removeDivBtn.title = translations[currentLang].removeDivTitle;
                     btnControls.appendChild(removeDivBtn);
                     
                     container.appendChild(btnControls); 
@@ -1015,14 +779,14 @@
                 try {
                     const permission = await navigator.permissions.query({ name: 'clipboard-read' });
                     if (permission.state === 'denied') {
-                        throw new Error('Доступ к буферу обмена запрещен.');
+                        throw new Error(translations[currentLang].clipboardDenied);
                     }
                     
                     const clipboardItems = await navigator.clipboard.read();
                     const imageItem = clipboardItems.find(item => item.types.some(type => type.startsWith("image/")));
                     
                     if (!imageItem) {
-                        alert('Картинка не найдена в буфере обмена.');
+                        alert(translations[currentLang].imgNotFound);
                         return;
                     }
                     
@@ -1037,7 +801,7 @@
                     }
                 } catch (err) {
                     console.error('Ошибка вставки:', err);
-                    alert('Не удалось вставить картинку. ' + err.message);
+                    alert(translations[currentLang].pasteError + err.message);
                 }
             }
             
@@ -1148,7 +912,7 @@
             addButton.addEventListener('click', async () => {
                 const newItem = {
                     id: Date.now(),
-                    text: "Новый",
+                    text: translations[currentLang].defaultText,
                     image: null,
                     order: divisionsData.length
                 };
@@ -1159,6 +923,8 @@
             });
 
             async function main() {
+                currentLang = getInitialLang();
+                
                 applyTheme(localStorage.getItem('theme') || 'light');
                 
                 const savedTitle = localStorage.getItem('scaleTitle') || '';
@@ -1183,7 +949,7 @@
                 }
                 
                 captureState();
-                renderDivisions();
+                updateUI(currentLang);
             }
 
             main();

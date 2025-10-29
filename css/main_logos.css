@@ -1,0 +1,63 @@
+.button,button {
+  color:var(--button-text,#000000);
+  background-color:var(--button-background,transparent);
+	border:var(--button-border,none);
+	transition:filter 0.2s ease,transform 0.2s ease;
+}
+
+.button:hover,button:hover {
+	filter:brightness(90%);
+	transform:translateY(-1px);
+}
+
+.icon {
+	filter:var(--icon-filter,none);
+}
+
+/* Default */
+.button.button-default {
+	--button-text:#000000;
+	--button-background:#ffffff;
+}
+
+/* MyAnimeList */
+.button-myanimelist {
+  --button-text:#ffffff;
+  --button-background:#133a95;
+}
+
+/* Infinite Backlog */
+.button.button-infinite-backlog {
+	--button-text:#ffffff;
+	--button-background:#1b1e26;
+}
+
+/* Last.fm */
+.button-last-fm {
+	--button-text:#ffffff;
+	--button-background:#D51007;
+}
+
+/* Letterboxd */
+.button-letterboxd {
+	--button-text:#ffffff;
+	--button-background:#2c3440;
+}
+
+/* Serializd */
+.button-serializd {
+  --button-text:#44bba5;
+  background-image:linear-gradient(to right, #306f66, #1b2228);
+}
+
+/* YouTube */
+.button-yt {
+	--button-text:#ffffff;
+	--button-background:#282828;
+}
+
+/* 0to10 */
+.button-0to10 {
+  --button-text:#000000;
+  background-image:linear-gradient(to right, #e74c3c, #f1c40f, #2ecc71);
+}

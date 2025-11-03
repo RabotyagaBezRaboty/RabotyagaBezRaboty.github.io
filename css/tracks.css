@@ -16,7 +16,7 @@
   contain: content; /* https://developer.chrome.com/blog/css-containment/ */
   container-type: inline-size;
   overflow: clip;
-  max-height: 100%;
+  max-height: 148;
   opacity: 1;
   color: rgb(255, 255, 255); /* #222; */
   background-color: #D51007;
@@ -51,7 +51,7 @@
   margin: 0;
   padding: 0;
   border: none;
-  max-height: inherit;
+  max-height: 148;
   overflow-y: auto;
   scrollbar-width: none; /* Standard supported by Firefox 64+, Chrome/Chromium 121+ & Safari 18.2+ - https://caniuse.com/?search=scrollbar-width */
 }

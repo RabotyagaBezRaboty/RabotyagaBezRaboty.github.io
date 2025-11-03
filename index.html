@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <script src="css/lastfm.js" type="module"></script>
     <title>Boulder's Stash</title>
     <link rel="icon" type="image/x-icon" href="images\icons\bouldersstash.ico">
     <link rel="stylesheet" href="css/main.css">
@@ -33,22 +33,28 @@
               <a class="button button-infinite-backlog" href="https://infinitebacklog.net/users/rabotyagabezraboty" target="_blank" rel="noopener" role="button"><img class="icon" aria-hidden="true" src="images/icons/infinite-backlog.svg" alt="Infinite Backlog Logo"> <span style="color: #2ea2dc">Infinite </span> Backlog </a> 
 
               <!-- Last.fm -->
-              <a class="button button-last-fm" href="https://www.last.fm/user/RBTYAGABEZRBTY" target="_blank" rel="noopener" role="button"><img class="icon" aria-hidden="true" src="images/icons/last-fm.svg" alt="">Last.fm</a>
+              <a class="button button-last-fm" href="https://www.last.fm/user/RBTYAGABEZRBTY" target="_blank" rel="noopener" role="button" style="flex-direction:column; align-items:stretch;">
+                <div style="display:flex; align-items:center; justify-content:center; width:100%;">
+                <img class="icon" aria-hidden="true" src="images/icons/last-fm.svg" alt="">
+                <span style="display:inline-block;">Last.fm</span>
+                </div>
+                <lastfm-tracks user="RBTYAGABEZRBTY"></lastfm-tracks>
+              </a>
 
-			  <!-- Letterboxd -->
+			        <!-- Letterboxd -->
               <a class="button button-letterboxd" href="https://boxd.it/8BFjP" target="_blank" rel="noopener" role="button"><img class="icon" aria-hidden="true" src="images/icons/letterboxd.svg" alt="">Letterboxd</a>
 
               <!-- Serializd -->
-			  <a class="button button-serializd" href="https://srlzd.com/u/BoulderOfLazy" target="_blank" rel="noopener" role="button"><img class="icon" aria-hidden="true" src="images/icons/serializd.svg" alt="Serializd Logo">Serializd</a>
+			        <a class="button button-serializd" href="https://srlzd.com/u/BoulderOfLazy" target="_blank" rel="noopener" role="button"><img class="icon" aria-hidden="true" src="images/icons/serializd.svg" alt="Serializd Logo">Serializd</a>
 			  
               <!-- MyAnimeList -->
               <a class="button button-myanimelist" href="https://myanimelist.net/animelist/BoulderOfLazy" target="_blank" rel="noopener" role="button"><img class="icon" aria-hidden="true" src="images/icons/myanimelist.svg" alt="MyAnimeList Logo">MyAnimeList</a>
 
               <!-- 0to10 -->
-              <a class="button button-0to10" href="https://boulderoflazy.github.io/0to10.html" target="_blank" rel="noopener" role="button">0 to 10</a>
+              <a class="button button-0to10" href="https://rabotyagabezraboty.github.io/0to10.html" target="_blank" rel="noopener" role="button">0 to 10</a>
 
-			  <!-- Ultimate Game Meme -->
-              <a class="button button-default" href="https://boulderoflazy.github.io/ultimategamememe.html" target="_blank" rel="noopener" role="button">Ultimate Game Meme</a>
+			        <!-- Ultimate Game Meme -->
+              <a class="button button-default" href="https://rabotyagabezraboty.github.io/ultimategamememe.html" target="_blank" rel="noopener" role="button">Ultimate Game Meme</a>
 
       </div>
 
@@ -61,6 +67,4 @@
 
 </body>
 
-
 </html>
-
